@@ -56,10 +56,15 @@ function parseCSV(inputFile)
     for(var i = 0; i < lines.length; i++)
     {
         var components = lines[i].split(",");
-        if(components.indexOf("L") == -1)
+        var tStamp =  components[1];
+        var obs = components[3];
+        if(typeof(obs) != 'undefined')
         {
-            timestamps.push(components[1]);
-            observations.push(components[3]);
+            if(obs.indexOf("L") == -1 && obs.indexOf("panic") == -1 && obs.length < 6)
+            {
+                timestamps.push(tStamp);
+                observations.push(obs);
+            }
         }
             
     }
