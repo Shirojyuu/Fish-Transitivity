@@ -57,9 +57,29 @@
             </div>
         </div>
         <div class="col-md-4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+          <h2>Filter Relationship Triad</h2>
+          <p>Use the drop-down menus to select the trio of fish to observe for transitivity.</p>
+          <p>
+            <select id = "filter-1">
+              <option selected>1</option>
+              <option>2</option>
+              <option>3</option> 
+              <option>4</option>                                         
+            </select>
+            <select id = "filter-2">
+              <option>1</option>
+              <option selected>2</option>
+              <option>3</option>              
+              <option>4</option>                                         
+            </select>
+            <select id = "filter-3">
+              <option>1</option>
+              <option>2</option>
+              <option selected>3</option>              
+              <option>4</option>                                         
+            </select>
+            <button class="btn btn-primary" id="filterswitch" disabled>Update Filter</button>
+          </p>
        </div>
         <div class="col-md-4">
           <h2>Heading</h2>
@@ -74,7 +94,7 @@
           <!-- This will be the main canvas for drawing data to the screen -->
           <canvas id = "dataWindow" width = 21500px> Your browser does not support HTML5 Canvas.</canvas>
         </div>
-        <div class = "panel-heading panel-primary">Data Display</div>
+        <div class = "panel-heading panel-primary" id="dispPanel">Data Display</div>
       </div>
         </div>
 
