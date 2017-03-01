@@ -3,9 +3,8 @@
 
 
 //TODOS
-// TODO : Display how long a triad is transitive in the dataset
 // TODO : Check for correctness of transitivity
-//      - Figure out the deal with them black dots!
+//      - Figure out the deal with them black dots (after the initial green and reds)
 
 var canvas;
 var loadedCSV;
@@ -69,6 +68,7 @@ function init()
             loadedCSV = savedCSV = csv;
             parseCSV(loadedCSV);
             $("#filterswitch").attr("disabled", false);
+            updateFilter();            
             plotTimepoints();
         }
         reader.readAsDataURL(selectedFile);
@@ -350,7 +350,9 @@ function updateFilter()
     aMap1 = fishRelations[parseInt(triadFish1)];
     aMap2 = fishRelations[parseInt(triadFish2)];
     aMap3 = fishRelations[parseInt(triadFish3)];
-    console.log(aMap1);
+    console.log(triadFish1);
+    console.log(triadFish2);
+    console.log(triadFish3);    
     aStr2 = triadFish2;
     aStr1 = triadFish1;
     clearCanvasAndUpdate();
