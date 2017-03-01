@@ -4,8 +4,8 @@
 
 //TODOS
 // TODO : Display how long a triad is transitive in the dataset
-// TODO : Proper clearing on the canvas
-// TODO : Figure out the deal with them black dots!
+// TODO : Check for correctness of transitivity
+//      - Figure out the deal with them black dots!
 
 var canvas;
 var loadedCSV;
@@ -26,7 +26,7 @@ var connexD;
 //plotOnCanvas function.
 var aMap1, aMap2, aMap3, aStr2, aStr1;
 var triadFish1, triadFish2, triadFish3;
-
+var savedCSV;
 $(document).ready
 {
     init();
@@ -60,7 +60,7 @@ function init()
             var data = e.target.result;
             var b64 = data.split('base64,')[1];
             var csv = atob(b64);
-            loadedCSV = csv;
+            loadedCSV = savedCSV = csv;
             parseCSV(loadedCSV);
             $("#filterswitch").attr("disabled", false);
             plotTimepoints();
@@ -332,5 +332,7 @@ function clearCanvasAndUpdate()
     ctx.clearRect(0,0, canvas.width, canvas.height);
     $("#dispPanel").text("Data Display: " + triadFish1 + "-" + triadFish2 + "-" + triadFish3 + " triad");
     plotTimepoints();
-    plotOnCanvas(aMap1, aMap2, aMap3, aStr2, aStr1);
+    
+    if(savedCSV != undefined)
+        parseCSV(savedCSV);
 }
