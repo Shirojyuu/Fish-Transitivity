@@ -26,7 +26,13 @@ var connexD;
 //plotOnCanvas function.
 var aMap1, aMap2, aMap3, aStr2, aStr1;
 var triadFish1, triadFish2, triadFish3;
+
+//The last loadedCSV file; global access
 var savedCSV;
+
+//These get constantly updated; used for determining times of transitivity
+var transStart = -1,  transEnd = -1;
+
 $(document).ready
 {
     init();
@@ -120,7 +126,7 @@ function plotTimepoints()
     ctx.fill();
 
 
-
+//Plot the numbers, too!
     ctx.font = "10px Arial";
     for(var i = 0; i < canvas.width; i++)
     {
@@ -143,30 +149,54 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
        var xOffset = 0;
        var ctx = canvas.getContext("2d");
 
-           ctx.beginPath();
-           ctx.arc(xOffset + timestamps[timestamps.length - 1], 50, 5, 0, 360);
+        ctx.beginPath();
+        ctx.arc(xOffset + timestamps[timestamps.length - 1], 50, 5, 0, 360);
 
-           var color = "#000000";
-        //    Do some testing here
-           if(isTransitive(cMap1, cMap2, cMap3, cString2, cString1))
-           {
-               color = "#00ff00";
-           }
-    
-           else if(isIntransitive(cMap1, cMap2, cMap3, cString2, cString1))
-           {
-               color = "#ff0000";
-           }
+        var color = "#000000";
+        //Do some testing here
+        if(isTransitive(cMap1, cMap2, cMap3, cString2, cString1))
+        {
+            if(transStart == -1)
+                transStart = timestamps[timestamps.length - 1];
 
-           //Not enough info to determine transitivity
-           else
-           {
-               var color = "#000000";
-           }
+            color = "#00ff00";
+        }
+
+        else if(isIntransitive(cMap1, cMap2, cMap3, cString2, cString1))
+        {
+            if(transStart != -1 && transEnd == -1)
+            {
+                 transEnd = timestamps[timestamps.length - 1];
+                 console.log(transStart + " (Start)");
+                 console.log(transEnd   + " (End)");
+                 plotTransTimePeriod(xOffset);
+            }
+            color = "#ff0000";
+
             
-           ctx.fillStyle = color;
-           ctx.fill()
-           ctx.closePath();
+        }
+
+        //Not enough info to determine transitivity
+        else
+        {
+            if(transStart != -1 && transEnd == -1)
+            {
+                
+                 transEnd = timestamps[timestamps.length - 1];
+                 console.log(transStart + " (Start)");
+                 console.log(transEnd   + " (End)");
+                 plotTransTimePeriod(xOffset);
+            }
+            var color = "#000000";
+
+            //plotTransTimePeriod(xOffset);            
+        }
+        
+           
+        
+        ctx.fillStyle = color;
+        ctx.fill()
+        ctx.closePath();
 }
 
 //Takes an observation, ob, and builds a mapping between the acting fish and receiving fish
@@ -274,7 +304,7 @@ function isTransitive(cm1, cm2, cm3, cv2, cv3)
     return false;
 }
 
-//Takes 3 connex maps and then checks entries against each other for transitivity.
+//Takes 3 connex maps and then checks entries against each other for intransitivity.
 function isIntransitive(cm1, cm2, cm3, cv2, cv3)
 {
     if(cm1[cv2] == 0)
@@ -335,4 +365,27 @@ function clearCanvasAndUpdate()
     
     if(savedCSV != undefined)
         parseCSV(savedCSV);
+}
+
+//Plots a line from the start of a transitivity period to its end.
+function plotTransTimePeriod(xOff)
+{
+    var delta = transEnd - transStart;
+    
+    var ctx = canvas.getContext("2d");
+    ctx.beginPath();
+    ctx.strokeStyle = "#00aa00";            
+    ctx.moveTo(xOff + transStart, 10);
+    ctx.lineTo(transEnd, 10);
+    ctx.stroke();
+
+
+    ctx.font = "bold 13px Arial";   
+    ctx.fillStyle = "#00aa00";
+    ctx.fill();
+    ctx.fillText(delta + " sec", transStart, 25);
+    ctx.closePath();
+
+    transStart = -1;
+    transEnd = -1;
 }
