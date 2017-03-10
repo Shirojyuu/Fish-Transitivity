@@ -393,6 +393,8 @@ function updateFilter()
     console.log(triadFish3);    
     aStr2 = triadFish2;
     aStr1 = triadFish1;
+
+    transEnd = transStart = intraEnd = intraStart = -1;
     clearCanvasAndUpdate();
 }
 
