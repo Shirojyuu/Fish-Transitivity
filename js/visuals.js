@@ -3,9 +3,13 @@
 
 
 //TODOS
-// TODO : Check for correctness of transitivity
-//      - Figure out the deal with them black dots (after the initial green and reds)
+// TODO : Show all four triads concurrently on the graph.
+// TODO : Zoom level slider for the graph.
+// TODO : Statistics
+//          - Total Time Triad is in transitive/intransitivite states (and stats on that)        
 
+// Considerations:
+// Bars vs Observation Plots
 var canvas;
 var loadedCSV;
 
@@ -31,6 +35,7 @@ var savedCSV;
 
 //These get constantly updated; used for determining times of transitivity
 var transStart = -1,  transEnd = -1;
+var intraStart = -1, intraEnd = -1;
 
 $(document).ready
 {
@@ -150,7 +155,6 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
        var ctx = canvas.getContext("2d");
 
         ctx.beginPath();
-        ctx.arc(xOffset + timestamps[timestamps.length - 1], 50, 5, 0, 360);
 
         var color = "#000000";
         //Do some testing here
@@ -159,21 +163,44 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
             if(transStart == -1)
                 transStart = timestamps[timestamps.length - 1];
 
+            //Confirm intransitive period has ended
+            if(intraStart != -1 && intraEnd == -1)
+            {
+                 intraEnd = timestamps[timestamps.length - 1];
+                 console.log(intraStart + " (IT Start)");
+                 console.log(intraEnd   + " (IT End)");
+                 plotTransTimePeriod(xOffset, "intrans");
+            }
+
             color = "#00ff00";
+            ctx.fillStyle = color;
+
+            //Uncomment this to draw transitive data points
+            //ctx.arc(xOffset + timestamps[timestamps.length - 1], 50, 5, 0, 360);
+            
+            ctx.fill();
         }
 
         else if(isIntransitive(cMap1, cMap2, cMap3, cString2, cString1))
         {
+            if(intraStart == -1)
+                intraStart = timestamps[timestamps.length - 1];
+
+            //Confirm transitive period has ended
             if(transStart != -1 && transEnd == -1)
             {
                  transEnd = timestamps[timestamps.length - 1];
                  console.log(transStart + " (Start)");
                  console.log(transEnd   + " (End)");
-                 plotTransTimePeriod(xOffset);
+                 plotTransTimePeriod(xOffset, "trans");
             }
             color = "#ff0000";
 
-            
+            //Uncomment this to draw intransitive data points
+            // ctx.arc(xOffset + timestamps[timestamps.length - 1], 50, 5, 0, 360);
+
+            ctx.fillStyle = color;
+            ctx.fill();
         }
 
         //Not enough info to determine transitivity
@@ -185,17 +212,28 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
                  transEnd = timestamps[timestamps.length - 1];
                  console.log(transStart + " (Start)");
                  console.log(transEnd   + " (End)");
-                 plotTransTimePeriod(xOffset);
+                 plotTransTimePeriod(xOffset, "trans");
             }
-            var color = "#000000";
 
+                
+            else if(intraStart != -1 && intraEnd == -1)
+            {
+                 intraEnd = timestamps[timestamps.length - 1];
+                 console.log(intraStart + " (IT Start)");
+                 console.log(intraEnd   + " (IT End)");
+                 plotTransTimePeriod(xOffset, "intrans");
+            }
+
+            //Uncomment this to draw these "not-enough-info" data points
+            // ctx.arc(xOffset + timestamps[timestamps.length - 1], 75, 5, 0, 360);
+            ctx.fillStyle = "#000000";
+            ctx.fill();
             //plotTransTimePeriod(xOffset);            
         }
         
            
         
-        ctx.fillStyle = color;
-        ctx.fill()
+   
         ctx.closePath();
 }
 
@@ -370,24 +408,67 @@ function clearCanvasAndUpdate()
 }
 
 //Plots a line from the start of a transitivity period to its end.
-function plotTransTimePeriod(xOff)
+function plotTransTimePeriod(xOff, mode)
 {
-    var delta = transEnd - transStart;
-    
     var ctx = canvas.getContext("2d");
-    ctx.beginPath();
-    ctx.strokeStyle = "#00aa00";            
-    ctx.moveTo(xOff + transStart, 10);
-    ctx.lineTo(transEnd, 10);
-    ctx.stroke();
+    var delta;
+    var style;
+    if(mode == "trans")
+    {
+        delta = transEnd - transStart;
+        if(delta == 503)
+        {
+            console.log("catch");
+        }
+        style = "#00ee00";
+
+        ctx.beginPath();
+        ctx.strokeStyle = ctx.fillStyle = style;
+        ctx.fillRect(xOff + transStart, 8, transEnd - (xOff + transStart), 8);
+        // ctx.moveTo(xOff + transStart, 10);
+        // ctx.lineTo(transEnd, 10);
+        //ctx.stroke();
 
 
-    ctx.font = "bold 13px Arial";   
-    ctx.fillStyle = "#00aa00";
-    ctx.fill();
-    ctx.fillText(delta + " sec", transStart, 25);
-    ctx.closePath();
+        ctx.font = "bold 13px Arial";   
+        ctx.fillStyle = style;
+        ctx.fill();
+        ctx.fillText(delta + " sec", transStart, 28);
+        ctx.closePath();
 
-    transStart = -1;
-    transEnd = -1;
+        transStart = -1;
+        transEnd = -1;
+        ctx.closePath();
+    }
+
+    if(mode == "intrans")
+    {
+        delta = intraEnd - intraStart;
+        style = "#ee0000";
+        if(delta == 503)
+        {
+            console.log("catch");
+        }
+        ctx.beginPath();
+        ctx.strokeStyle = ctx.fillStyle = style;
+        ctx.fillRect(xOff + intraStart, 8, intraEnd - (xOff + intraStart), 8);         
+        // ctx.moveTo(xOff + intraStart, 10);
+        // ctx.lineTo(intraEnd, 10);
+        ctx.stroke();
+
+
+        ctx.font = "bold 13px Arial";   
+        ctx.fillStyle = style;
+        ctx.fill();
+        ctx.fillText(delta + " sec", intraStart, 28);
+        ctx.closePath();
+
+        intraStart = -1;
+        intraEnd = -1;
+        ctx.closePath();
+    }
+    
+    
+    
+   
 }
