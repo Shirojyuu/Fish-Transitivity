@@ -37,6 +37,19 @@ var savedCSV;
 var transStart = -1,  transEnd = -1;
 var intraStart = -1, intraEnd = -1;
 
+
+//Objects holding stats on transitivity
+var statsTrans =
+{
+    'totalEntries': 0,
+    'totalTime': 0
+};
+var statsIntrans =
+{
+    'totalEntries': 0,
+    'totalTime': 0
+};
+
 $(document).ready
 {
     init();
@@ -89,9 +102,10 @@ function init()
     }
 }
 
+//Split the csv on a per-line basis.
 function parseCSV(inputFile)
 {
-    //Split the csv on a per-line basis.
+
     //Data Order:
     //  video #, time (sec), converted time, observation
     
@@ -394,7 +408,7 @@ function updateFilter()
     aStr2 = triadFish2;
     aStr1 = triadFish1;
 
-    transEnd = transStart = intraEnd = intraStart = -1;
+    initStats();
     clearCanvasAndUpdate();
 }
 
@@ -418,6 +432,8 @@ function plotTransTimePeriod(xOff, mode)
     if(mode == "trans")
     {
         delta = transEnd - transStart;
+        statsTrans.totalEntries++;
+        statsTrans.totalTime+= delta;
         if(delta == 503)
         {
             console.log("catch");
@@ -446,6 +462,9 @@ function plotTransTimePeriod(xOff, mode)
     if(mode == "intrans")
     {
         delta = intraEnd - intraStart;
+        statsIntrans.totalEntries++;
+        statsIntrans.totalTime+= delta;
+
         style = "#ee0000";
         if(delta == 503)
         {
@@ -473,4 +492,11 @@ function plotTransTimePeriod(xOff, mode)
     
     
    
+}
+
+function initStats()
+{
+    transEnd = transStart = intraEnd = intraStart = -1;
+    statsTrans.totalEntries = statsTrans.totalTime = statsIntrans.totalEntries = statsIntrans.totalTime = 0;
+    
 }
