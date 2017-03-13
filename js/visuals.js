@@ -3,10 +3,13 @@
 
 
 //TODOS
-// TODO : Show all four triads concurrently on the graph.
+// TODO : Show all four triads concurrently on the graph. [done]
+//          - Revise for correctness
+// TODO : Condense some functions
 // TODO : Zoom level slider for the graph.
 // TODO : Statistics
-//          - Total Time Triad is in transitive/intransitivite states (and stats on that)        
+//          - Total Time Triad is in transitive/intransitivite states (and stats on that)    
+//                  - Which stats?    
 
 // Considerations:
 // Bars vs Observation Plots
@@ -41,13 +44,18 @@ var intraStart = -1, intraEnd = -1;
 //Objects holding stats on transitivity
 var statsTrans =
 {
-    'totalEntries': 0,
-    'totalTime': 0
+    'totalTime_123': 0,
+    'totalTime_234': 0,
+    'totalTime_341': 0,
+    'totalTime_412': 0
 };
+
 var statsIntrans =
 {
-    'totalEntries': 0,
-    'totalTime': 0
+    'totalTime_123': 0,
+    'totalTime_234': 0,
+    'totalTime_341': 0,
+    'totalTime_412': 0
 };
 
 $(document).ready
@@ -67,12 +75,6 @@ function init()
     canvas = document.getElementById('dataWindow');   
     var context = canvas.getContext("2d");
     
-//    context.beginPath();
-//    context.arc(20, 20, 5, 0, 360);
-//    context.fillStyle = "blue";
-//    context.fill();
-//    console.log(canvas);
-//    
     //Open up the CSV file of choice
     $('#inputfile').change(function(data)
     {
@@ -123,16 +125,23 @@ function parseCSV(inputFile)
             {
                 timestamps.push(tStamp);
                 observations.push(obs);
-                plotOnCanvas(aMap1, aMap2, aMap3, aStr2, aStr1);
+
+                //Old, using the selectors at the top.
+                plotOnCanvas(aMap1, aMap2, aMap3, aStr2, aStr1, 8, "123");
+                
+                // plotOnCanvas(fishRelations[1], fishRelations[2], fishRelations[3], "2", "1", 8,  "123");
+                // plotOnCanvas(fishRelations[2], fishRelations[3], fishRelations[4], "3", "2", 33, "234");
+                // plotOnCanvas(fishRelations[3], fishRelations[4], fishRelations[1], "4", "3", 61, "341");
+                // plotOnCanvas(fishRelations[4], fishRelations[1], fishRelations[2], "1", "4", 86, "412");
+
                 mapRelation(obs);
             }
         }
             
     }
-    
-    // console.log(timestamps);
-    // console.log(observations);
+
     dataAvaialble = true;
+    fillInTable();
 }
 
 //Plots little ticks to represent units of time.
@@ -145,7 +154,7 @@ function plotTimepoints()
     ctx.fill();
 
 
-//Plot the numbers, too!
+    //Plot the numbers, too!
     ctx.font = "10px Arial";
     for(var i = 0; i < canvas.width; i++)
     {
@@ -163,7 +172,7 @@ function plotTimepoints()
 }
 
 //Plots the actual data itself on the graph. Feed in the connection maps to check.
-function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
+function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1, yOffset, triad)
 {
        var xOffset = 0;
        var ctx = canvas.getContext("2d");
@@ -183,7 +192,7 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
                  intraEnd = timestamps[timestamps.length - 1];
                  console.log(intraStart + " (IT Start)");
                  console.log(intraEnd   + " (IT End)");
-                 plotTransTimePeriod(xOffset, "intrans");
+                 plotTransTimePeriod(xOffset, yOffset, "intrans", triad);
             }
 
             color = "#00ff00";
@@ -206,7 +215,7 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
                  transEnd = timestamps[timestamps.length - 1];
                  console.log(transStart + " (Start)");
                  console.log(transEnd   + " (End)");
-                 plotTransTimePeriod(xOffset, "trans");
+                 plotTransTimePeriod(xOffset, yOffset, "trans", triad);
             }
             color = "#ff0000";
 
@@ -226,7 +235,7 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
                  transEnd = timestamps[timestamps.length - 1];
                  console.log(transStart + " (Start)");
                  console.log(transEnd   + " (End)");
-                 plotTransTimePeriod(xOffset, "trans");
+                 plotTransTimePeriod(xOffset, yOffset, "trans", triad);
             }
 
                 
@@ -235,7 +244,7 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1)
                  intraEnd = timestamps[timestamps.length - 1];
                  console.log(intraStart + " (IT Start)");
                  console.log(intraEnd   + " (IT End)");
-                 plotTransTimePeriod(xOffset, "intrans");
+                 plotTransTimePeriod(xOffset, yOffset, "intrans", triad);
             }
 
             //Uncomment this to draw these "not-enough-info" data points
@@ -424,7 +433,8 @@ function clearCanvasAndUpdate()
 }
 
 //Plots a line from the start of a transitivity period to its end.
-function plotTransTimePeriod(xOff, mode)
+//NOTE TO SELF: Consider condensing the delta calculation stuff down into its own function.
+function plotTransTimePeriod(xOff, yOff, mode, triad)
 {
     var ctx = canvas.getContext("2d");
     var delta;
@@ -432,17 +442,32 @@ function plotTransTimePeriod(xOff, mode)
     if(mode == "trans")
     {
         delta = transEnd - transStart;
-        statsTrans.totalEntries++;
-        statsTrans.totalTime+= delta;
-        if(delta == 503)
+
+        //Add to the stats of the corresponding triad!
+        switch(triad)
         {
-            console.log("catch");
+            case "123":
+                statsTrans.totalTime_123 += delta;
+                break;
+
+            case "234":
+                statsTrans.totalTime_234 += delta;
+                break;
+
+            case "341":
+                statsTrans.totalTime_341 += delta;
+                break;
+            
+            case "412":
+                statsTrans.totalTime_412 += delta;
+                break;
         }
+
         style = "#00ee00";
 
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect(xOff + transStart, 8, transEnd - (xOff + transStart), 8);
+        ctx.fillRect(xOff + transStart, yOff, transEnd - (xOff + transStart), yOff);
         // ctx.moveTo(xOff + transStart, 10);
         // ctx.lineTo(transEnd, 10);
         //ctx.stroke();
@@ -451,7 +476,7 @@ function plotTransTimePeriod(xOff, mode)
         ctx.font = "bold 13px Arial";   
         ctx.fillStyle = style;
         ctx.fill();
-        ctx.fillText(delta + " sec", transStart, 28);
+        ctx.fillText(delta + " sec", transStart, yOff + 20);
         ctx.closePath();
 
         transStart = -1;
@@ -462,17 +487,31 @@ function plotTransTimePeriod(xOff, mode)
     if(mode == "intrans")
     {
         delta = intraEnd - intraStart;
-        statsIntrans.totalEntries++;
-        statsIntrans.totalTime+= delta;
+
+        switch(triad)
+        {
+            case "123":
+                statsIntrans.totalTime_123 += delta;
+                break;
+
+            case "234":
+                statsIntrans.totalTime_234 += delta;
+                break;
+
+            case "341":
+                statsIntrans.totalTime_341 += delta;
+                break;
+            
+            case "412":
+                statsIntrans.totalTime_412 += delta;
+                break;
+        }
 
         style = "#ee0000";
-        if(delta == 503)
-        {
-            console.log("catch");
-        }
+
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect(xOff + intraStart, 8, intraEnd - (xOff + intraStart), 8);         
+        ctx.fillRect(xOff + intraStart, yOff, intraEnd - (xOff + intraStart), yOff);         
         // ctx.moveTo(xOff + intraStart, 10);
         // ctx.lineTo(intraEnd, 10);
         ctx.stroke();
@@ -481,7 +520,7 @@ function plotTransTimePeriod(xOff, mode)
         ctx.font = "bold 13px Arial";   
         ctx.fillStyle = style;
         ctx.fill();
-        ctx.fillText(delta + " sec", intraStart, 28);
+        ctx.fillText(delta + " sec", intraStart, yOff + 20);
         ctx.closePath();
 
         intraStart = -1;
@@ -497,6 +536,29 @@ function plotTransTimePeriod(xOff, mode)
 function initStats()
 {
     transEnd = transStart = intraEnd = intraStart = -1;
-    statsTrans.totalEntries = statsTrans.totalTime = statsIntrans.totalEntries = statsIntrans.totalTime = 0;
+    $.each(statsTrans, function(index, value)
+    {
+        statsTrans[index] = 0;
+    });
+    
+    $.each(statsIntrans, function(index, value)
+    {
+        statsIntrans[index] = 0;
+    });
+}
+
+function fillInTable()
+{
+    $("#tri123-tr").text(statsTrans.totalTime_123);
+    $("#tri123-in").text(statsIntrans.totalTime_123);
+
+    $("#tri234-tr").text(statsTrans.totalTime_234);
+    $("#tri234-in").text(statsIntrans.totalTime_234);
+
+    $("#tri341-tr").text(statsTrans.totalTime_341);
+    $("#tri341-in").text(statsIntrans.totalTime_341);
+
+    $("#tri412-tr").text(statsTrans.totalTime_412);
+    $("#tri412-in").text(statsIntrans.totalTime_412);
     
 }
