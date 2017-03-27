@@ -5,11 +5,14 @@
 //TODOS
 // TODO : Show all four triads concurrently on the graph. [done]
 //          - Revise for correctness
-// TODO : Condense some functions
+// TODO : *Condense some functions*
+//          - Contiguous bars
 // TODO : Zoom level slider for the graph.
+//          - Fix display according to zoom
 // TODO : Statistics
 //          - Total Time Triad is in transitive/intransitivite states (and stats on that)    
-//                  - Which stats?    
+//                  - Which stats? - Avg Time trans/intrans per triad; Total in all groups (avg) 
+//                  - Use Excel to total stuff
 
 // Considerations:
 // Bars vs Observation Plots
@@ -57,6 +60,28 @@ var statsIntrans =
     'totalTime_341': 0,
     'totalTime_412': 0
 };
+
+var edgeList =
+{
+    'one_two' : 0,
+    'one_three' : 0,
+    'one_four' : 0,
+
+    'two_one' : 0,
+    'two_three' : 0,
+    'two_four' : 0,
+
+    'three_one' : 0,
+    'three_two' : 0,
+    'three_four': 0,
+
+    'four_one' : 0,
+    'four_two' : 0,
+    'four_three' : 0
+
+}
+
+var triad123, triad234, triad341, triad412;
 
 $(document).ready
 {
@@ -127,14 +152,16 @@ function parseCSV(inputFile)
                 observations.push(obs);
 
                 //Old, using the selectors at the top.
-                plotOnCanvas(aMap1, aMap2, aMap3, aStr2, aStr1, 8, "123");
+                // plotOnCanvas(aMap1, aMap2, aMap3, aStr2, aStr1, 8, "123");
                 
-                // plotOnCanvas(fishRelations[1], fishRelations[2], fishRelations[3], "2", "1", 8,  "123");
-                // plotOnCanvas(fishRelations[2], fishRelations[3], fishRelations[4], "3", "2", 33, "234");
-                // plotOnCanvas(fishRelations[3], fishRelations[4], fishRelations[1], "4", "3", 61, "341");
-                // plotOnCanvas(fishRelations[4], fishRelations[1], fishRelations[2], "1", "4", 86, "412");
+                plotOnCanvas(fishRelations[1], fishRelations[2], fishRelations[3], "2", "1", 8,  "123");
+                plotOnCanvas(fishRelations[2], fishRelations[3], fishRelations[4], "3", "2", 33, "234");
+                plotOnCanvas(fishRelations[3], fishRelations[4], fishRelations[1], "4", "3", 61, "341");
+                plotOnCanvas(fishRelations[4], fishRelations[1], fishRelations[2], "1", "4", 86, "412");
 
                 mapRelation(obs);
+                
+                console.log(triad123);
             }
         }
             
@@ -183,6 +210,7 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1, yOffset, triad)
         //Do some testing here
         if(isTransitive(cMap1, cMap2, cMap3, cString2, cString1))
         {
+            console.log(timestamps[timestamps.length-1]);
             if(transStart == -1)
                 transStart = timestamps[timestamps.length - 1];
 
@@ -190,8 +218,8 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1, yOffset, triad)
             if(intraStart != -1 && intraEnd == -1)
             {
                  intraEnd = timestamps[timestamps.length - 1];
-                 console.log(intraStart + " (IT Start)");
-                 console.log(intraEnd   + " (IT End)");
+                //  console.log(intraStart + " (IT Start)");
+                //  console.log(intraEnd   + " (IT End)");
                  plotTransTimePeriod(xOffset, yOffset, "intrans", triad);
             }
 
@@ -213,8 +241,8 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1, yOffset, triad)
             if(transStart != -1 && transEnd == -1)
             {
                  transEnd = timestamps[timestamps.length - 1];
-                 console.log(transStart + " (Start)");
-                 console.log(transEnd   + " (End)");
+                //  console.log(transStart + " (Start)");
+                //  console.log(transEnd   + " (End)");
                  plotTransTimePeriod(xOffset, yOffset, "trans", triad);
             }
             color = "#ff0000";
@@ -227,32 +255,32 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1, yOffset, triad)
         }
 
         //Not enough info to determine transitivity
-        else
-        {
-            if(transStart != -1 && transEnd == -1)
-            {
+        // else
+        // {
+        //     if(transStart != -1 && transEnd == -1)
+        //     {
                 
-                 transEnd = timestamps[timestamps.length - 1];
-                 console.log(transStart + " (Start)");
-                 console.log(transEnd   + " (End)");
-                 plotTransTimePeriod(xOffset, yOffset, "trans", triad);
-            }
+        //          transEnd = timestamps[timestamps.length - 1];
+        //          console.log(transStart + " (Start)");
+        //          console.log(transEnd   + " (End)");
+        //          plotTransTimePeriod(xOffset, yOffset, "trans", triad);
+        //     }
 
                 
-            else if(intraStart != -1 && intraEnd == -1)
-            {
-                 intraEnd = timestamps[timestamps.length - 1];
-                 console.log(intraStart + " (IT Start)");
-                 console.log(intraEnd   + " (IT End)");
-                 plotTransTimePeriod(xOffset, yOffset, "intrans", triad);
-            }
+        //     else if(intraStart != -1 && intraEnd == -1)
+        //     {
+        //          intraEnd = timestamps[timestamps.length - 1];
+        //          console.log(intraStart + " (IT Start)");
+        //          console.log(intraEnd   + " (IT End)");
+        //          plotTransTimePeriod(xOffset, yOffset, "intrans", triad);
+        //     }
 
-            //Uncomment this to draw these "not-enough-info" data points
-            // ctx.arc(xOffset + timestamps[timestamps.length - 1], 75, 5, 0, 360);
-            ctx.fillStyle = "#000000";
-            ctx.fill();
-            //plotTransTimePeriod(xOffset);            
-        }
+        //     //Uncomment this to draw these "not-enough-info" data points
+        //     // ctx.arc(xOffset + timestamps[timestamps.length - 1], 75, 5, 0, 360);
+        //     ctx.fillStyle = "#000000";
+        //     ctx.fill();
+        //     //plotTransTimePeriod(xOffset);            
+        // }
         
            
         
@@ -261,9 +289,9 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1, yOffset, triad)
 }
 
 //Takes an observation, ob, and builds a mapping between the acting fish and receiving fish
+
 function mapRelation(ob)
 {
-    //Index 0 = Actor, Index 1 = Action, Index 2 = Receiver
     var interactions = ob.split(" ");
     var act = interactions[0];
     var rcv = interactions[2];
@@ -273,131 +301,127 @@ function mapRelation(ob)
         case "1":
             if(rcv == "2")
             {
-                connexA[rcv] = 1;
-                connexB[act] = 0;
+                edgeList.one_two = 1;
+                edgeList.two_one = 0;
             }
             else if(rcv == "3")
             {
-                connexA[rcv] = 1;
-                connexC[act] = 0;
+                edgeList.one_three = 1;
+                edgeList.three_one = 0;
             }
             else if(rcv == "4")
             {
-                connexA[rcv] = 1;
-                connexD[act] = 0;
+                edgeList.one_four = 1;
+                edgeList.four_one = 0;
             }
             break;
         
         case "2":
             if(rcv == "1")
             {
-                connexB[rcv] = 1;
-                connexA[act] = 0;
+                edgeList.two_one = 1;
+                edgeList.one_two = 0;
             }
             else if(rcv == "3")
             {
-                connexB[rcv] = 1;
-                connexC[act] = 0;
+                edgeList.two_three = 1;
+                edgeList.three_two = 0;
             }
             else if(rcv == "4")
             {
-                connexB[rcv] = 1;
-                connexD[act] = 0;
+                edgeList.two_four = 1;
+                edgeList.four_two = 0;
             }
             break;
 
         case "3":
             if(rcv == "1")
             {
-                connexC[rcv] = 1;
-                connexA[act] = 0;
+                edgeList.three_one = 1;
+                edgeList.one_three = 0;
             }
             else if(rcv == "2")
             {
-                connexC[rcv] = 1;
-                connexB[act] = 0;
+                edgeList.three_two = 1;
+                edgeList.two_three = 0;
             }
             else if(rcv == "4")
             {
-                connexC[rcv] = 1;
-                connexD[act] = 0;
+                edgeList.three_four = 1;
+                edgeList.four_three = 0;
             }
             break;
 
         case "4":
             if(rcv == "1")
             {
-                connexD[rcv] = 1;
-                connexA[act] = 0;
+                edgeList.four_one = 1;
+                edgeList.one_four = 0;
             }
             else if(rcv == "2")
             {
-                connexD[rcv] = 1;
-                connexB[act] = 0;
+                edgeList.four_two = 1;
+                edgeList.two_four = 0;
             }
             else if(rcv == "3")
             {
-                connexD[rcv] = 1;
-                connexC[act] = 0;
+                edgeList.four_three = 1;
+                edgeList.three_four = 0;
             }
             break;
     }
+
+//Now, build a triad from the edge list, with 6 total entries for each direction of the arrows
+    triad123 = [
+        edgeList.one_two, edgeList.two_one,
+        edgeList.two_three, edgeList.three_two,
+        edgeList.three_one, edgeList.one_three
+    ];
+
+    triad234 = [
+        edgeList.two_three, edgeList.three_two,
+        edgeList.three_four, edgeList.four_three,
+        edgeList.four_two, edgeList.two_four
+    ];
+
+    triad341 = [
+        edgeList.three_four, edgeList.four_three,
+        edgeList.four_one, edgeList.one_four,
+        edgeList.one_three, edgeList.three_one
+        
+    ];
+
+    triad412 = [
+        edgeList.four_one, edgeList.one_four,
+        edgeList.one_two, edgeList.two_one,
+        edgeList.two_four, edgeList.four_two
+    ];
 }
 
 //Takes 3 connex maps and then checks entries against each other for transitivity.
-function isTransitive(cm1, cm2, cm3, cv2, cv3)
+function isTransitive(testTriad)
 {
-    if(cm1[cv2] == 1)
-    {
-        if(cm2[cv3] == 1)
-        {
-            if(cm1[cv3] == 1)
-                return true;
-        }
+    //Three configurations for being transitive:
+    var config1 = [1, 0, 1, 0, 0, 1];
+    var config2 = [1, 0, 0, 1, 1, 0];
+    var config3 = [0, 1, 0, 1, 1, 0];
 
-        else if(cm3[cv2] == 1)
-        {
-            if(cm1[cv2] == 1)
-                return true;
-        }
-    }
-
+    if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3))
+        return true;
+    
     return false;
 }
 
 //Takes 3 connex maps and then checks entries against each other for intransitivity.
-function isIntransitive(cm1, cm2, cm3, cv2, cv3)
+function isIntransitive(testTriad)
 {
-    if(cm1[cv2] == 0)
-    {
-        if(cm2[cv3] == 0)
-        {
-            if(cm1[cv3] == 0)
-                return true;
-        }
+    //Two configurations for being intransitive:
+    var config1 = [1, 0, 1, 0, 1, 0];
+    var config2 = [0, 1, 0, 1, 0, 1];
 
-        else if(cm3[cv2] == 0)
-        {
-            if(cm1[cv2] == 0)
-                return true;
-        }
-    }
-
-    else if(cm1[cv2] == 1)
-    {
-        if(cm2[cv3] == 0)
-        {
-            if(cm1[cv3] == 0)
-                return true;
-        }
-
-        else if(cm3[cv2] == 0)
-        {
-            if(cm1[cv2] == 0)
-                return true;
-        }
-    }
-
+    if(isSame(testTriad, config1) || isSame(testTriad, config2))
+        return true;
+    
     return false;
 }
 
@@ -561,4 +585,19 @@ function fillInTable()
     $("#tri412-tr").text(statsTrans.totalTime_412);
     $("#tri412-in").text(statsIntrans.totalTime_412);
     
+}
+
+//Helper
+function isSame(array1, array2)
+{
+    var same;
+    if((array1.length == array2.length))
+    {
+        same = array1.every(function(element, index) 
+        {
+            return element === array2[index];
+        });
+    }
+
+    return same;
 }
