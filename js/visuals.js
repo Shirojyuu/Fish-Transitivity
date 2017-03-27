@@ -152,16 +152,12 @@ function parseCSV(inputFile)
                 observations.push(obs);
 
                 //Old, using the selectors at the top.
-                // plotOnCanvas(aMap1, aMap2, aMap3, aStr2, aStr1, 8, "123");
-                
-                plotOnCanvas(fishRelations[1], fishRelations[2], fishRelations[3], "2", "1", 8,  "123");
-                plotOnCanvas(fishRelations[2], fishRelations[3], fishRelations[4], "3", "2", 33, "234");
-                plotOnCanvas(fishRelations[3], fishRelations[4], fishRelations[1], "4", "3", 61, "341");
-                plotOnCanvas(fishRelations[4], fishRelations[1], fishRelations[2], "1", "4", 86, "412");
-
                 mapRelation(obs);
-                
-                console.log(triad123);
+
+                plotOnCanvas(triad123, 8, 16, "123");
+                plotOnCanvas(triad234, 33, 41, "234");
+                plotOnCanvas(triad341, 61, 69, "341");
+                plotOnCanvas(triad412, 86, 94, "412");
             }
         }
             
@@ -175,15 +171,26 @@ function parseCSV(inputFile)
 function plotTimepoints()
 {
     var ctx = canvas.getContext("2d");
+    
+    //Labels for the triads
+    ctx.fillStyle = "#000000";
+    ctx.fill();
+            
+    ctx.fillText("1-2-3", 10, 8);
+    ctx.fillText("2-3-4", 10, 33);
+    ctx.fillText("3-4-1", 10, 61);
+    ctx.fillText("4-1-2", 10, 86);
+
+
     ctx.beginPath();
-    ctx.rect(0, 110, canvas.width, 1);
+    ctx.rect(50, 110, canvas.width + 50, 1);
     ctx.fillStyle = "#000000";
     ctx.fill();
 
 
     //Plot the numbers, too!
     ctx.font = "10px Arial";
-    for(var i = 0; i < canvas.width; i++)
+    for(var i = 50; i < canvas.width; i++)
     {
         if(i % 50 == 0)
         {
@@ -199,7 +206,7 @@ function plotTimepoints()
 }
 
 //Plots the actual data itself on the graph. Feed in the connection maps to check.
-function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1, yOffset, triad)
+function plotOnCanvas(plotTriad, yOffset, yEnd, triad)
 {
        var xOffset = 0;
        var ctx = canvas.getContext("2d");
@@ -208,81 +215,35 @@ function plotOnCanvas(cMap1, cMap2, cMap3, cString2, cString1, yOffset, triad)
 
         var color = "#000000";
         //Do some testing here
-        if(isTransitive(cMap1, cMap2, cMap3, cString2, cString1))
+
+        if(isTransitive(plotTriad))
         {
-            console.log(timestamps[timestamps.length-1]);
             if(transStart == -1)
                 transStart = timestamps[timestamps.length - 1];
 
             //Confirm intransitive period has ended
-            if(intraStart != -1 && intraEnd == -1)
+            if(intraStart != -1)
             {
                  intraEnd = timestamps[timestamps.length - 1];
-                //  console.log(intraStart + " (IT Start)");
-                //  console.log(intraEnd   + " (IT End)");
-                 plotTransTimePeriod(xOffset, yOffset, "intrans", triad);
+                 plotTransTimePeriod(xOffset, yOffset, yEnd, "intrans", triad);
             }
-
-            color = "#00ff00";
-            ctx.fillStyle = color;
-
-            //Uncomment this to draw transitive data points
-            //ctx.arc(xOffset + timestamps[timestamps.length - 1], 50, 5, 0, 360);
-            
-            ctx.fill();
         }
 
-        else if(isIntransitive(cMap1, cMap2, cMap3, cString2, cString1))
+        else if(isIntransitive(plotTriad))
         {
             if(intraStart == -1)
                 intraStart = timestamps[timestamps.length - 1];
 
             //Confirm transitive period has ended
-            if(transStart != -1 && transEnd == -1)
+            if(transStart != -1)
             {
                  transEnd = timestamps[timestamps.length - 1];
                 //  console.log(transStart + " (Start)");
                 //  console.log(transEnd   + " (End)");
-                 plotTransTimePeriod(xOffset, yOffset, "trans", triad);
+                
+                 plotTransTimePeriod(xOffset, yOffset, yEnd, "trans", triad);
             }
-            color = "#ff0000";
-
-            //Uncomment this to draw intransitive data points
-            // ctx.arc(xOffset + timestamps[timestamps.length - 1], 50, 5, 0, 360);
-
-            ctx.fillStyle = color;
-            ctx.fill();
         }
-
-        //Not enough info to determine transitivity
-        // else
-        // {
-        //     if(transStart != -1 && transEnd == -1)
-        //     {
-                
-        //          transEnd = timestamps[timestamps.length - 1];
-        //          console.log(transStart + " (Start)");
-        //          console.log(transEnd   + " (End)");
-        //          plotTransTimePeriod(xOffset, yOffset, "trans", triad);
-        //     }
-
-                
-        //     else if(intraStart != -1 && intraEnd == -1)
-        //     {
-        //          intraEnd = timestamps[timestamps.length - 1];
-        //          console.log(intraStart + " (IT Start)");
-        //          console.log(intraEnd   + " (IT End)");
-        //          plotTransTimePeriod(xOffset, yOffset, "intrans", triad);
-        //     }
-
-        //     //Uncomment this to draw these "not-enough-info" data points
-        //     // ctx.arc(xOffset + timestamps[timestamps.length - 1], 75, 5, 0, 360);
-        //     ctx.fillStyle = "#000000";
-        //     ctx.fill();
-        //     //plotTransTimePeriod(xOffset);            
-        // }
-        
-           
         
    
         ctx.closePath();
@@ -449,7 +410,6 @@ function clearCanvasAndUpdate()
 {
     var ctx = canvas.getContext("2d");
     ctx.clearRect(0,0, canvas.width, canvas.height);
-    $("#dispPanel").text("Data Display: " + triadFish1 + "-" + triadFish2 + "-" + triadFish3 + " triad");
     plotTimepoints();
     
     if(savedCSV != undefined)
@@ -458,7 +418,7 @@ function clearCanvasAndUpdate()
 
 //Plots a line from the start of a transitivity period to its end.
 //NOTE TO SELF: Consider condensing the delta calculation stuff down into its own function.
-function plotTransTimePeriod(xOff, yOff, mode, triad)
+function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
 {
     var ctx = canvas.getContext("2d");
     var delta;
@@ -488,24 +448,25 @@ function plotTransTimePeriod(xOff, yOff, mode, triad)
         }
 
         style = "#00ee00";
-
+        
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect(xOff + transStart, yOff, transEnd - (xOff + transStart), yOff);
-        // ctx.moveTo(xOff + transStart, 10);
-        // ctx.lineTo(transEnd, 10);
-        //ctx.stroke();
+        ctx.fillRect(xOff + transStart, yOff, transEnd - (xOff + transStart), (yEnd - yOff));
+        ctx.closePath();
 
+        
 
-        ctx.font = "bold 13px Arial";   
+        ctx.beginPath();
+        ctx.font = "bold 13px Verdana";   
         ctx.fillStyle = style;
         ctx.fill();
-        ctx.fillText(delta + " sec", transStart, yOff + 20);
+        ctx.fillText(delta + " sec", transStart,  yOff);
         ctx.closePath();
 
         transStart = -1;
         transEnd = -1;
-        ctx.closePath();
+        return;
+       
     }
 
     if(mode == "intrans")
@@ -535,26 +496,20 @@ function plotTransTimePeriod(xOff, yOff, mode, triad)
 
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect(xOff + intraStart, yOff, intraEnd - (xOff + intraStart), yOff);         
-        // ctx.moveTo(xOff + intraStart, 10);
-        // ctx.lineTo(intraEnd, 10);
-        ctx.stroke();
+        ctx.fillRect(xOff + intraStart, yOff, intraEnd - (xOff + intraStart), (yEnd - yOff));         
+        ctx.closePath();
 
 
-        ctx.font = "bold 13px Arial";   
+        ctx.font = "bold 13px Verdana";   
         ctx.fillStyle = style;
         ctx.fill();
-        ctx.fillText(delta + " sec", intraStart, yOff + 20);
+        ctx.fillText(delta + " sec", intraStart, yOff);
         ctx.closePath();
 
         intraStart = -1;
         intraEnd = -1;
-        ctx.closePath();
+        return;
     }
-    
-    
-    
-   
 }
 
 function initStats()
