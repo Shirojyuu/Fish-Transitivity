@@ -3,10 +3,7 @@
 
 
 //TODOS
-// TODO : Show all four triads concurrently on the graph. [done]
-//          - Revise for correctness
-// TODO : *Condense some functions*
-//          - Contiguous bars
+// TODO : Contiguous bars
 // TODO : Zoom level slider for the graph.
 //          - Fix display according to zoom
 // TODO : Statistics
@@ -22,19 +19,6 @@ var loadedCSV;
 var timestamps = [];
 var observations = [];
 var dataAvaialble = false;
-
-var fishRelations;
-
-//These are maps for each fish and their relation to another fish
-var connexA;
-var connexB;
-var connexC;
-var connexD;
-
-//These are the "active" maps and selection strings that are used in the
-//plotOnCanvas function.
-var aMap1, aMap2, aMap3, aStr2, aStr1;
-var triadFish1, triadFish2, triadFish3;
 
 //The last loadedCSV file; global access
 var savedCSV;
@@ -61,6 +45,8 @@ var statsIntrans =
     'totalTime_412': 0
 };
 
+//A list defining the connections between fish in a binary sense. 
+//Used to construct the triads that get compared.
 var edgeList =
 {
     'one_two' : 0,
@@ -81,22 +67,17 @@ var edgeList =
 
 }
 
+//Placeholders for when the triads are established
 var triad123, triad234, triad341, triad412;
 
 $(document).ready
 {
     init();
+    initStats();
 }
 
 function init()
 {
-    connexA = new Map(), connexB = new Map(), connexC = new Map(), connexD = new Map();
-    fishRelations = new Map();
-    fishRelations[1] = connexA;
-    fishRelations[2] = connexB;
-    fishRelations[3] = connexC;
-    fishRelations[4] = connexD;
-
     canvas = document.getElementById('dataWindow');   
     var context = canvas.getContext("2d");
     
@@ -229,7 +210,7 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad)
             }
         }
 
-        else if(isIntransitive(plotTriad))
+        if(isIntransitive(plotTriad))
         {
             if(intraStart == -1)
                 intraStart = timestamps[timestamps.length - 1];
@@ -384,26 +365,6 @@ function isIntransitive(testTriad)
         return true;
     
     return false;
-}
-
-function updateFilter()
-{
-    var maps = [connexA, connexB, connexC, connexD];
-    triadFish1 = $("#filter-1").val();
-    triadFish2 = $("#filter-2").val();
-    triadFish3 = $("#filter-3").val();
-    
-    aMap1 = fishRelations[parseInt(triadFish1)];
-    aMap2 = fishRelations[parseInt(triadFish2)];
-    aMap3 = fishRelations[parseInt(triadFish3)];
-    console.log(triadFish1);
-    console.log(triadFish2);
-    console.log(triadFish3);    
-    aStr2 = triadFish2;
-    aStr1 = triadFish1;
-
-    initStats();
-    clearCanvasAndUpdate();
 }
 
 function clearCanvasAndUpdate()
