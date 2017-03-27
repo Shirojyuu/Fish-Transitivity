@@ -50,37 +50,13 @@
     <div class="container">
       <!-- Example row of columns -->
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-8">
           <h2>Load CSV Here</h2>
             <div id="mainDiv" class="horizon">
             <input type="file" class="" id="inputfile"/>
             </div>
         </div>
-        <div class="col-md-4">
-          <h2>Filter Relationship Triad</h2>
-          <p>Use the drop-down menus to select the trio of fish to observe for transitivity.</p>
-          <p>
-            <select id = "filter-1">
-              <option selected>1</option>
-              <option>2</option>
-              <option>3</option> 
-              <option>4</option>                                         
-            </select>
-            <select id = "filter-2">
-              <option>1</option>
-              <option selected>2</option>
-              <option>3</option>              
-              <option>4</option>                                         
-            </select>
-            <select id = "filter-3">
-              <option>1</option>
-              <option>2</option>
-              <option selected>3</option>              
-              <option>4</option>                                         
-            </select>
-            <button class="btn btn-primary" id="filterswitch" disabled>Update Filter</button>
-          </p>
-       </div>
+        
         <div class="col-md-4">
           <h2>Heading</h2>
           <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
@@ -94,7 +70,9 @@
           <!-- This will be the main canvas for drawing data to the screen -->
           <canvas id = "dataWindow" width = 21500px> Your browser does not support HTML5 Canvas.</canvas>
         </div>
-        <div class = "panel-heading panel-primary" id="dispPanel">Data Display</div>
+        <div class = "panel-heading panel-primary" id="dispPanel">Data display
+        <input id = "scaleSlider" type = "range" min = "0.25", max = "1" value = "1" step = "0.25">
+        </div>
       </div>
         </div>
 

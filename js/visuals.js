@@ -14,6 +14,7 @@
 // Considerations:
 // Bars vs Observation Plots
 var canvas;
+var canvScale = 1;
 var loadedCSV;
 
 var timestamps = [];
@@ -76,6 +77,10 @@ $(document).ready
     initStats();
 }
 
+$("#scaleSlider").change(function(value)
+{
+    canvScale = $(this).val();
+})
 function init()
 {
     canvas = document.getElementById('dataWindow');   
@@ -92,22 +97,13 @@ function init()
             var b64 = data.split('base64,')[1];
             var csv = atob(b64);
             loadedCSV = savedCSV = csv;
-            parseCSV(loadedCSV);
-            $("#filterswitch").attr("disabled", false);
-            updateFilter();            
+            parseCSV(loadedCSV);          
             plotTimepoints();
         }
         reader.readAsDataURL(selectedFile);
        
         
     });
-
-    $("#filterswitch").click(updateFilter);
-    updateFilter();
-    if(dataAvaialble == true)
-    {
-        console.log("All done!");
-    }
 }
 
 //Split the csv on a per-line basis.
@@ -157,28 +153,28 @@ function plotTimepoints()
     ctx.fillStyle = "#000000";
     ctx.fill();
             
-    ctx.fillText("1-2-3", 10, 8);
-    ctx.fillText("2-3-4", 10, 33);
-    ctx.fillText("3-4-1", 10, 61);
-    ctx.fillText("4-1-2", 10, 86);
+    ctx.fillText("1-2-3", 10 * canvScale, 12 * canvScale);
+    ctx.fillText("2-3-4", 10 * canvScale, 37 * canvScale);
+    ctx.fillText("3-4-1", 10 * canvScale, 65 * canvScale);
+    ctx.fillText("4-1-2", 10 * canvScale, 90 * canvScale);
 
 
     ctx.beginPath();
-    ctx.rect(50, 110, canvas.width + 50, 1);
+    ctx.rect(50 * canvScale, 110 * canvScale, (canvas.width + 50) * canvScale, canvScale);
     ctx.fillStyle = "#000000";
     ctx.fill();
 
 
     //Plot the numbers, too!
     ctx.font = "10px Arial";
-    for(var i = 50; i < canvas.width; i++)
+    for(var i = 50; i < canvas.width ; i++)
     {
         if(i % 50 == 0)
         {
-            ctx.rect(i, 115, 0.4, 5);
+            ctx.rect(i, 115 * canvScale, 0.4 * canvScale, 5 * canvScale);
             ctx.fillStyle = "#000000";
             ctx.fill();
-            ctx.fillText(i, i + 1, 130);
+            ctx.fillText(i, (i + 1) * canvScale, 130 * canvScale);
         }
 
     }
@@ -200,13 +196,17 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad)
         if(isTransitive(plotTriad))
         {
             if(transStart == -1)
+            {
                 transStart = timestamps[timestamps.length - 1];
+                console.log(observations[observations.length - 1]);
+            }
+              
 
             //Confirm intransitive period has ended
             if(intraStart != -1)
             {
                  intraEnd = timestamps[timestamps.length - 1];
-                 plotTransTimePeriod(xOffset, yOffset, yEnd, "intrans", triad);
+                 plotTransTimePeriod(xOffset * canvScale, yOffset * canvScale, yEnd * canvScale, "intrans", triad);
             }
         }
 
@@ -222,7 +222,7 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad)
                 //  console.log(transStart + " (Start)");
                 //  console.log(transEnd   + " (End)");
                 
-                 plotTransTimePeriod(xOffset, yOffset, yEnd, "trans", triad);
+                 plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
             }
         }
         
@@ -340,7 +340,7 @@ function mapRelation(ob)
     ];
 }
 
-//Takes 3 connex maps and then checks entries against each other for transitivity.
+//Takes a triad and then checks entries against configurations for transitivity.
 function isTransitive(testTriad)
 {
     //Three configurations for being transitive:
@@ -354,7 +354,7 @@ function isTransitive(testTriad)
     return false;
 }
 
-//Takes 3 connex maps and then checks entries against each other for intransitivity.
+//Takes a triad and then checks entries against configurations for intransitivity.
 function isIntransitive(testTriad)
 {
     //Two configurations for being intransitive:
@@ -412,7 +412,7 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
         
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect(xOff + transStart, yOff, transEnd - (xOff + transStart), (yEnd - yOff));
+        ctx.fillRect((xOff + transStart) * canvScale, yOff * canvScale, (transEnd - (xOff + transStart))*canvScale, (yEnd - yOff)*canvScale);
         ctx.closePath();
 
         
@@ -421,7 +421,7 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
         ctx.font = "bold 13px Verdana";   
         ctx.fillStyle = style;
         ctx.fill();
-        ctx.fillText(delta + " sec", transStart,  yOff);
+        ctx.fillText(delta + " sec", transStart* canvScale,  yOff* canvScale);
         ctx.closePath();
 
         transStart = -1;
@@ -457,14 +457,14 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
 
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect(xOff + intraStart, yOff, intraEnd - (xOff + intraStart), (yEnd - yOff));         
+        ctx.fillRect((xOff + intraStart)* canvScale, yOff* canvScale, (intraEnd - (xOff + intraStart))* canvScale, (yEnd - yOff)* canvScale);         
         ctx.closePath();
 
 
         ctx.font = "bold 13px Verdana";   
         ctx.fillStyle = style;
         ctx.fill();
-        ctx.fillText(delta + " sec", intraStart, yOff);
+        ctx.fillText(delta + " sec", intraStart* canvScale, yOff* canvScale);
         ctx.closePath();
 
         intraStart = -1;
