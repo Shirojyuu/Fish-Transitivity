@@ -3,13 +3,14 @@
 
 
 //TODOS
-// TODO : Contiguous bars
 // TODO : Zoom level slider for the graph.
 //          - Fix display according to zoom
 // TODO : Statistics
 //          - Total Time Triad is in transitive/intransitivite states (and stats on that)    
 //                  - Which stats? - Avg Time trans/intrans per triad; Total in all groups (avg) 
 //                  - Use Excel to total stuff
+
+// TODO : Calculations for the timing of certain bars
 
 // Considerations:
 // Bars vs Observation Plots
@@ -566,8 +567,9 @@ function isTransitive(testTriad)
     var config1 = [1, 0, 1, 0, 0, 1];
     var config2 = [1, 0, 0, 1, 1, 0];
     var config3 = [0, 1, 0, 1, 1, 0];
+    var config4 = [1, 0, 0, 1, 0, 1];    
 
-    if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3))
+    if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3) || isSame(testTriad, config4))
         return true;
     
     return false;
@@ -579,8 +581,10 @@ function isIntransitive(testTriad)
     //Two configurations for being intransitive:
     var config1 = [1, 0, 1, 0, 1, 0];
     var config2 = [0, 1, 0, 1, 0, 1];
+    var config3 = [0, 1, 1, 0, 0, 1];    
+    var config4 = [0, 0, 0, 0, 0, 0];
 
-    if(isSame(testTriad, config1) || isSame(testTriad, config2))
+    if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3) ||  isSame(testTriad, config4))
         return true;
     
     return false;
