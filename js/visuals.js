@@ -46,6 +46,18 @@ var statsIntrans =
     'totalTime_412': 0
 };
 
+//Delta Trans/Delta Intrans arrays for statistics. Store the delta times of transitivity
+var dt_123 = [], 
+    di_123 = [],
+    dt_234 = [], 
+    di_234 = [], 
+    dt_341 = [], 
+    di_341 = [], 
+    dt_412 = [], 
+    di_412 = [];
+
+var totalTime;
+
 //A list defining the connections between fish in a binary sense. 
 //Used to construct the triads that get compared.
 var edgeList =
@@ -139,7 +151,8 @@ function parseCSV(inputFile)
         }
             
     }
-
+    
+    totalTime = timestamps[timestamps.length - 1];
     dataAvaialble = true;
     fillInTable();
 }
@@ -387,24 +400,28 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
     if(mode == "trans")
     {
         delta = transEnd - transStart;
-
+        
         //Add to the stats of the corresponding triad!
         switch(triad)
         {
             case "123":
                 statsTrans.totalTime_123 += delta;
+                dt_123.push(delta);
                 break;
 
             case "234":
                 statsTrans.totalTime_234 += delta;
+                dt_234.push(delta);
                 break;
 
             case "341":
                 statsTrans.totalTime_341 += delta;
+                dt_341.push(delta);
                 break;
             
             case "412":
                 statsTrans.totalTime_412 += delta;
+                dt_412.push(delta);
                 break;
         }
 
@@ -438,18 +455,22 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
         {
             case "123":
                 statsIntrans.totalTime_123 += delta;
+                di_123.push(delta);
                 break;
 
             case "234":
                 statsIntrans.totalTime_234 += delta;
+                di_234.push(delta);                
                 break;
 
             case "341":
                 statsIntrans.totalTime_341 += delta;
+                di_341.push(delta);                
                 break;
             
             case "412":
                 statsIntrans.totalTime_412 += delta;
+                di_412.push(delta);                
                 break;
         }
 
@@ -491,15 +512,23 @@ function fillInTable()
 {
     $("#tri123-tr").text(statsTrans.totalTime_123);
     $("#tri123-in").text(statsIntrans.totalTime_123);
+    $("#tri123-avgTr").text(averageArray(dt_123));
+    $("#tri123-avgIn").text(averageArray(di_123));
 
     $("#tri234-tr").text(statsTrans.totalTime_234);
     $("#tri234-in").text(statsIntrans.totalTime_234);
+    $("#tri234-avgTr").text(averageArray(dt_234));
+    $("#tri234-avgIn").text(averageArray(di_234));
 
     $("#tri341-tr").text(statsTrans.totalTime_341);
     $("#tri341-in").text(statsIntrans.totalTime_341);
+    $("#tri341-avgTr").text(averageArray(dt_341));
+    $("#tri341-avgIn").text(averageArray(di_341));
 
     $("#tri412-tr").text(statsTrans.totalTime_412);
     $("#tri412-in").text(statsIntrans.totalTime_412);
+    $("#tri412-avgTr").text(averageArray(dt_412));
+    $("#tri412-avgIn").text(averageArray(di_412));
     
 }
 
@@ -516,4 +545,15 @@ function isSame(array1, array2)
     }
 
     return same;
+}
+
+function averageArray(array)
+{
+    var sum = 0;
+    array.every(function(element, index)
+    {
+        sum += array[index];
+    })
+
+    return sum / array.length;
 }
