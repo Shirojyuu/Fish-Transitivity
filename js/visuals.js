@@ -291,6 +291,11 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
     var lI_Start = 0;
     var lI_End = 0;
 
+    if(triad == "341")
+    {
+        // console.log(transStart, transEnd, intraStart, intraEnd);
+        // console.log(triad, plotTriad, timestamps[index]);
+    }
     switch(triad)
     {
         case "123":
@@ -322,15 +327,7 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
             break;
     }
     var xOffset = 0;
-    //    if(triad == "123" && timestamps[index] == 9681)
-    //    {
-    //        console.log(triad123);
-    //        console.log(transStart)
-    //    }
-            if(index == 0 && triad == "412")
-            {
-                console.log("STAHP");
-            }
+
         //Do some testing here
         if(isTransitive(plotTriad))
         {
@@ -349,7 +346,6 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
 
                     case "341":
                         transStart.pt341 = timestamps[index];            
-                    
                         break;
 
                     case "412":
@@ -357,8 +353,6 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
                         break;
                 }
                      
-                if(triad == "341")
-                    console.log(triad, plotTriad, timestamps[index]);
             }
               
 
@@ -366,6 +360,30 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
             if(lI_Start != -1)
             {
                 switch(triad)
+                {
+                    case "123":
+                        intraEnd.pt123 = timestamps[index];            
+                        break;
+
+                    case "234":
+                        intraEnd.pt234 = timestamps[index];            
+                        break;
+
+                    case "341":
+                        intraEnd.pt341 = timestamps[index];            
+                        break;
+
+                    case "412":
+                        intraEnd.pt412 = timestamps[index];            
+                        break;
+                }
+                //  lI_End = timestamps[index];
+                 plotTransTimePeriod(xOffset * canvScale, yOffset * canvScale, yEnd * canvScale, "intrans", triad);
+            }
+
+            if(index == timestamps.length - 1 && lI_Start != -1)
+            {
+                 switch(triad)
                 {
                     case "123":
                         intraEnd.pt123 = timestamps[index];            
@@ -436,6 +454,36 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
                 
                  plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
             }
+
+            
+        }
+
+        if(index == timestamps.length - 1 && lT_Start != -1)
+        {
+                switch(triad)
+                {
+                    case "123":
+                        console.log(transStart, transEnd, intraStart, intraEnd);
+                        transEnd.pt123 = timestamps[index];            
+                        break;
+
+                    case "234":
+                        console.log(transStart, transEnd, intraStart, intraEnd);                    
+                        transEnd.pt234 = timestamps[index];            
+                        break;
+
+                    case "341":
+                        console.log(transStart, transEnd, intraStart, intraEnd);                    
+                        transEnd.pt341 = timestamps[index];            
+                        break;
+
+                    case "412":
+                        console.log(transStart, transEnd, intraStart, intraEnd);                    
+                        transEnd.pt412 = timestamps[index];            
+                        break;
+                }
+                
+                 plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
         }
 }
 
@@ -582,9 +630,8 @@ function isIntransitive(testTriad)
     var config1 = [1, 0, 1, 0, 1, 0];
     var config2 = [0, 1, 0, 1, 0, 1];
     var config3 = [0, 1, 1, 0, 0, 1];    
-    var config4 = [0, 0, 0, 0, 0, 0];
 
-    if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3) ||  isSame(testTriad, config4))
+    if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3))
         return true;
     
     return false;
