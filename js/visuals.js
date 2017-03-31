@@ -143,9 +143,9 @@ function parseCSV(inputFile)
                 //Old, using the selectors at the top.
                 mapRelation(obs);
 
-                plotOnCanvas(triad123, 8, 16, "123");
-                plotOnCanvas(triad234, 33, 41, "234");
-                plotOnCanvas(triad341, 61, 69, "341");
+                // plotOnCanvas(triad123, 8, 16, "123");
+                // plotOnCanvas(triad234, 33, 41, "234");
+                // plotOnCanvas(triad341, 61, 69, "341");
                 plotOnCanvas(triad412, 86, 94, "412");
             }
         }
@@ -199,13 +199,8 @@ function plotTimepoints()
 function plotOnCanvas(plotTriad, yOffset, yEnd, triad)
 {
        var xOffset = 0;
-       var ctx = canvas.getContext("2d");
 
-        ctx.beginPath();
-
-        var color = "#000000";
         //Do some testing here
-
         if(isTransitive(plotTriad))
         {
             if(transStart == -1)
@@ -238,9 +233,6 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad)
                  plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
             }
         }
-        
-   
-        ctx.closePath();
 }
 
 //Takes an observation, ob, and builds a mapping between the acting fish and receiving fish
@@ -550,10 +542,12 @@ function isSame(array1, array2)
 function averageArray(array)
 {
     var sum = 0;
-    array.every(function(element, index)
-    {
-        sum += array[index];
-    })
+    array.forEach(function(element) {
+        sum += element;
+    }, this);
 
+ 
+    console.log(sum);
+    
     return sum / array.length;
 }
