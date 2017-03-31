@@ -25,8 +25,35 @@ var dataAvaialble = false;
 var savedCSV;
 
 //These get constantly updated; used for determining times of transitivity
-var transStart = -1,  transEnd = -1;
-var intraStart = -1, intraEnd = -1;
+var transStart = 
+{
+    'pt123' : -1,
+    'pt234' : -1,
+    'pt341' : -1,
+    'pt412' : -1,
+},
+transEnd = 
+{
+    'pt123' : -1,
+    'pt234' : -1,
+    'pt341' : -1,
+    'pt412' : -1,
+}
+
+var intraStart = 
+{
+    'pt123' : -1,
+    'pt234' : -1,
+    'pt341' : -1,
+    'pt412' : -1,
+},
+intraEnd =
+{
+    'pt123' : -1,
+    'pt234' : -1,
+    'pt341' : -1,
+    'pt412' : -1,
+}
 
 
 //Objects holding stats on transitivity
@@ -141,17 +168,77 @@ function parseCSV(inputFile)
                 observations.push(obs);
 
                 //Old, using the selectors at the top.
-                mapRelation(obs);
+                
 
                 // plotOnCanvas(triad123, 8, 16, "123");
                 // plotOnCanvas(triad234, 33, 41, "234");
                 // plotOnCanvas(triad341, 61, 69, "341");
-                plotOnCanvas(triad412, 86, 94, "412");
+                
             }
         }
+
+       
             
     }
     
+     //Disgusting series of for-loops to display each bar because JS is single-threaded...
+     for(var j = 0; j <= timestamps.length; j++)
+     {
+            if(j < timestamps.length)
+            {   
+                mapRelation(observations[j], "123");
+                plotOnCanvas(triad123, 8, 16, "123", j);
+            }
+
+            if(j == timestamps.length)
+            {
+                clearEdgeList("123");
+                initPeriods();
+            }
+     }
+     for(var k = 0; k <= timestamps.length; k++)
+     {
+            if(k < timestamps.length)
+            {   
+                mapRelation(observations[k], "234");
+                plotOnCanvas(triad234, 33, 41, "234", k);
+            }
+
+            if(k == timestamps.length)
+            {
+                clearEdgeList("234");
+                initPeriods();                
+            }
+     }
+     for(var m = 0; m <= timestamps.length; m++)
+     {
+            if(m < timestamps.length)
+            {   
+                mapRelation(observations[m], "341");
+                plotOnCanvas(triad341, 61, 69, "341", m);
+            }
+
+            if(m == timestamps.length)
+            {
+                clearEdgeList("341");
+                initPeriods();
+            }
+     }
+     for(var n = 0; n <= timestamps.length; n++)
+     {
+            if(n < timestamps.length)
+            {  
+                mapRelation(observations[n], "412");
+                plotOnCanvas(triad412, 86, 94, "412", n);
+            }
+
+            if(n == timestamps.length)
+            {
+                clearEdgeList("412");
+                initPeriods();                
+            }
+     }
+
     totalTime = timestamps[timestamps.length - 1];
     dataAvaialble = true;
     fillInTable();
@@ -196,39 +283,155 @@ function plotTimepoints()
 }
 
 //Plots the actual data itself on the graph. Feed in the connection maps to check.
-function plotOnCanvas(plotTriad, yOffset, yEnd, triad)
+function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
 {
-       var xOffset = 0;
+    var lT_Start = 0;
+    var lT_End = 0;
+    var lI_Start = 0;
+    var lI_End = 0;
 
+    switch(triad)
+    {
+        case "123":
+            lT_Start = transStart.pt123;
+            lT_End = transEnd.pt123;
+            lI_Start = intraStart.pt123;
+            lI_End  = intraEnd.pt123;
+            break;
+
+        case "234":
+            lT_Start = transStart.pt234;
+            lT_End = transEnd.pt234;
+            lI_Start = intraStart.pt234;
+            lI_End  = intraEnd.pt234;
+            break;
+
+        case "341":
+            lT_Start = transStart.pt341;
+            lT_End = transEnd.pt341;
+            lI_Start = intraStart.pt341;
+            lI_End  = intraEnd.pt341;
+            break;
+
+        case "412":
+            lT_Start = transStart.pt412;
+            lT_End = transEnd.pt412;
+            lI_Start = intraStart.pt412;
+            lI_End  = intraEnd.pt412;
+            break;
+    }
+    var xOffset = 0;
+    //    if(triad == "123" && timestamps[index] == 9681)
+    //    {
+    //        console.log(triad123);
+    //        console.log(transStart)
+    //    }
+            if(index == 0 && triad == "412")
+            {
+                console.log("STAHP");
+            }
         //Do some testing here
         if(isTransitive(plotTriad))
         {
-            if(transStart == -1)
+           
+            if(lT_Start == -1)
             {
-                transStart = timestamps[timestamps.length - 1];
-                console.log(observations[observations.length - 1]);
+                switch(triad)
+                {
+                    case "123":
+                        transStart.pt123 = timestamps[index];            
+                        break;
+
+                    case "234":
+                        transStart.pt234 = timestamps[index];            
+                        break;
+
+                    case "341":
+                        transStart.pt341 = timestamps[index];            
+                    
+                        break;
+
+                    case "412":
+                        transStart.pt412 = timestamps[index];            
+                        break;
+                }
+                     
+                if(triad == "341")
+                    console.log(triad, plotTriad, timestamps[index]);
             }
               
 
             //Confirm intransitive period has ended
-            if(intraStart != -1)
+            if(lI_Start != -1)
             {
-                 intraEnd = timestamps[timestamps.length - 1];
+                switch(triad)
+                {
+                    case "123":
+                        intraEnd.pt123 = timestamps[index];            
+                        break;
+
+                    case "234":
+                        intraEnd.pt234 = timestamps[index];            
+                        break;
+
+                    case "341":
+                        intraEnd.pt341 = timestamps[index];            
+                        break;
+
+                    case "412":
+                        intraEnd.pt412 = timestamps[index];            
+                        break;
+                }
+                //  lI_End = timestamps[index];
                  plotTransTimePeriod(xOffset * canvScale, yOffset * canvScale, yEnd * canvScale, "intrans", triad);
             }
         }
 
         if(isIntransitive(plotTriad))
         {
-            if(intraStart == -1)
-                intraStart = timestamps[timestamps.length - 1];
-
-            //Confirm transitive period has ended
-            if(transStart != -1)
+            if(lI_Start == -1)
             {
-                 transEnd = timestamps[timestamps.length - 1];
-                //  console.log(transStart + " (Start)");
-                //  console.log(transEnd   + " (End)");
+                switch(triad)
+                {
+                    case "123":
+                        intraStart.pt123 = timestamps[index];            
+                        break;
+
+                    case "234":
+                        intraStart.pt234 = timestamps[index];            
+                        break;
+
+                    case "341":
+                        intraStart.pt341 = timestamps[index];            
+                        break;
+
+                    case "412":
+                        intraStart.pt412 = timestamps[index];            
+                        break;
+                }
+                // lI_Start = timestamps[index];
+            }
+            //Confirm transitive period has ended
+            if(lT_Start != -1)
+            {
+                switch(triad)
+                {
+                    case "123":
+                        transEnd.pt123 = timestamps[index];            
+                        break;
+
+                    case "234":
+                        transEnd.pt234 = timestamps[index];            
+                        break;
+
+                    case "341":
+                        transEnd.pt341 = timestamps[index];            
+                        break;
+
+                    case "412":
+                        transEnd.pt412 = timestamps[index];            
+                        break;
+                }
                 
                  plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
             }
@@ -237,7 +440,7 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad)
 
 //Takes an observation, ob, and builds a mapping between the acting fish and receiving fish
 
-function mapRelation(ob)
+function mapRelation(ob, triad)
 {
     var interactions = ob.split(" ");
     var act = interactions[0];
@@ -319,30 +522,41 @@ function mapRelation(ob)
     }
 
 //Now, build a triad from the edge list, with 6 total entries for each direction of the arrows
-    triad123 = [
-        edgeList.one_two, edgeList.two_one,
-        edgeList.two_three, edgeList.three_two,
-        edgeList.three_one, edgeList.one_three
-    ];
+    switch(triad)
+    {
+        case "123":
+            triad123 = [
+                edgeList.one_two, edgeList.two_one,
+                edgeList.two_three, edgeList.three_two,
+                edgeList.three_one, edgeList.one_three
+            ];
+            break;
 
-    triad234 = [
-        edgeList.two_three, edgeList.three_two,
-        edgeList.three_four, edgeList.four_three,
-        edgeList.four_two, edgeList.two_four
-    ];
+        case "234":
+            triad234 = [
+                edgeList.two_three, edgeList.three_two,
+                edgeList.three_four, edgeList.four_three,
+                edgeList.four_two, edgeList.two_four
+            ];
+            break;
 
-    triad341 = [
-        edgeList.three_four, edgeList.four_three,
-        edgeList.four_one, edgeList.one_four,
-        edgeList.one_three, edgeList.three_one
-        
-    ];
+        case "341":
+            triad341 = [
+                edgeList.three_four, edgeList.four_three,
+                edgeList.four_one, edgeList.one_four,
+                edgeList.one_three, edgeList.three_one
+                
+            ];
+            break;
 
-    triad412 = [
-        edgeList.four_one, edgeList.one_four,
-        edgeList.one_two, edgeList.two_one,
-        edgeList.two_four, edgeList.four_two
-    ];
+        case "412":
+            triad412 = [
+                edgeList.four_one, edgeList.one_four,
+                edgeList.one_two, edgeList.two_one,
+                edgeList.two_four, edgeList.four_two
+            ];
+            break;
+    }
 }
 
 //Takes a triad and then checks entries against configurations for transitivity.
@@ -389,31 +603,51 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
     var ctx = canvas.getContext("2d");
     var delta;
     var style;
+    var end, start;
     if(mode == "trans")
     {
-        delta = transEnd - transStart;
         
         //Add to the stats of the corresponding triad!
         switch(triad)
         {
             case "123":
+                end = transEnd.pt123;
+                start = transStart.pt123;
+                delta = Math.abs(end - start);    
                 statsTrans.totalTime_123 += delta;
                 dt_123.push(delta);
+                transStart.pt123 = -1;
+                transEnd.pt123 = -1;
                 break;
 
             case "234":
+                end = transEnd.pt234;
+                start = transStart.pt234;
+                delta = Math.abs(end - start); 
                 statsTrans.totalTime_234 += delta;
                 dt_234.push(delta);
+                transStart.pt234 = -1;
+                transEnd.pt234 = -1;
                 break;
 
             case "341":
+                end = transEnd.pt341;
+                start = transStart.pt341;
+                delta = Math.abs(end - start); 
                 statsTrans.totalTime_341 += delta;
                 dt_341.push(delta);
+                transStart.pt341 = -1;
+                transEnd.pt341 = -1;
                 break;
             
             case "412":
+                end = transEnd.pt412;
+                start = transStart.pt412;
+                delta = Math.abs(end - start); 
                 statsTrans.totalTime_412 += delta;
                 dt_412.push(delta);
+                transStart.pt412 = -1;
+                transEnd.pt412 = -1;
                 break;
         }
 
@@ -421,7 +655,7 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
         
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect((xOff + transStart) * canvScale, yOff * canvScale, (transEnd - (xOff + transStart))*canvScale, (yEnd - yOff)*canvScale);
+        ctx.fillRect((xOff + start) * canvScale, yOff * canvScale, (end - (xOff + start))*canvScale, (yEnd - yOff)*canvScale);
         ctx.closePath();
 
         
@@ -430,39 +664,54 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
         ctx.font = "bold 13px Verdana";   
         ctx.fillStyle = style;
         ctx.fill();
-        ctx.fillText(delta + " sec", transStart* canvScale,  yOff* canvScale);
+        ctx.fillText(delta + " sec", start* canvScale,  yOff* canvScale);
         ctx.closePath();
-
-        transStart = -1;
-        transEnd = -1;
         return;
        
     }
 
     if(mode == "intrans")
     {
-        delta = intraEnd - intraStart;
-
         switch(triad)
         {
             case "123":
+                end = intraEnd.pt123;
+                start = intraStart.pt123;
+                delta = Math.abs(end - start); 
                 statsIntrans.totalTime_123 += delta;
                 di_123.push(delta);
+                intraStart.pt123 = -1;
+                intraEnd.pt123 = -1;
                 break;
 
             case "234":
+                end = intraEnd.pt234;
+                start = intraStart.pt234;
+                delta = Math.abs(end - start); 
                 statsIntrans.totalTime_234 += delta;
-                di_234.push(delta);                
+                di_234.push(delta);
+                intraStart.pt234 = -1;
+                intraEnd.pt234 = -1;                
                 break;
 
             case "341":
+                end = intraEnd.pt341;
+                start = intraStart.pt341;
+                delta = Math.abs(end - start); 
                 statsIntrans.totalTime_341 += delta;
-                di_341.push(delta);                
+                di_341.push(delta);        
+                intraStart.pt341 = -1;
+                intraEnd.pt341 = -1;        
                 break;
             
             case "412":
+                end = intraEnd.pt412;
+                start = intraStart.pt412;
+                delta = Math.abs(end - start); 
                 statsIntrans.totalTime_412 += delta;
-                di_412.push(delta);                
+                di_412.push(delta);   
+                intraStart.pt412 = -1;
+                intraEnd.pt412 = -1;             
                 break;
         }
 
@@ -470,25 +719,23 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
 
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect((xOff + intraStart)* canvScale, yOff* canvScale, (intraEnd - (xOff + intraStart))* canvScale, (yEnd - yOff)* canvScale);         
+        ctx.fillRect((xOff + start)* canvScale, yOff* canvScale, (end - (xOff + start))* canvScale, (yEnd - yOff)* canvScale);         
         ctx.closePath();
 
 
         ctx.font = "bold 13px Verdana";   
         ctx.fillStyle = style;
         ctx.fill();
-        ctx.fillText(delta + " sec", intraStart* canvScale, yOff* canvScale);
+        ctx.fillText(delta + " sec", start* canvScale, yOff* canvScale);
         ctx.closePath();
 
-        intraStart = -1;
-        intraEnd = -1;
         return;
     }
 }
 
 function initStats()
 {
-    transEnd = transStart = intraEnd = intraStart = -1;
+    // transEnd = transStart = intraEnd = intraStart = -1;
     $.each(statsTrans, function(index, value)
     {
         statsTrans[index] = 0;
@@ -547,7 +794,75 @@ function averageArray(array)
     }, this);
 
  
-    console.log(sum);
     
+    if(array.length == 0)
+        return 0;
+
     return sum / array.length;
+}
+
+function clearEdgeList(triad)
+{
+    // switch(triad)
+    // {
+    //     case "123":
+            edgeList.one_two = edgeList.two_one = edgeList.two_three = edgeList.three_two = edgeList.three_one = edgeList.one_three = 0;
+            edgeList.two_three = edgeList.three_two = edgeList.three_four = edgeList.four_three = edgeList.four_two = edgeList.two_four = 0
+            edgeList.three_four = edgeList.four_three = edgeList.four_one = edgeList.one_four = edgeList.one_three = edgeList.three_one = 0
+             edgeList.four_one = edgeList.one_four = edgeList.one_two = edgeList.two_one = edgeList.two_four = edgeList.four_two = 0;
+             
+             triad123 = [
+                0, 0, 0, 0, 0, 0
+            ];
+
+            triad234 = [
+                0, 0, 0, 0, 0, 0
+            ];
+
+            triad341 = [
+                0, 0, 0, 0, 0, 0
+                
+            ];
+
+            triad412 = [
+                0, 0, 0, 0, 0, 0
+            ];
+    //         break;
+        
+    //     case "234":
+    //         edgeList.two_three = edgeList.three_two = edgeList.three_four = edgeList.four_three = edgeList.four_two = edgeList.two_four = 0
+    //         break;
+
+    //     case "341":
+    //         edgeList.three_four = edgeList.four_three = edgeList.four_one = edgeList.one_four = edgeList.one_three = edgeList.three_one = 0
+    //         break;
+
+    //     case "412":
+    //          edgeList.four_one = edgeList.one_four = edgeList.one_two = edgeList.two_one = edgeList.two_four = edgeList.four_two = 0;
+    //         break;
+    // }
+}
+
+function initPeriods()
+{
+    transStart.pt123 = -1;
+    transStart.pt234 = -1;
+    transStart.pt341 = -1;
+    transStart.pt412 = -1;
+
+    transEnd.pt123 = -1,
+    transEnd.pt234 = -1,
+    transEnd.pt341 = -1,
+    transEnd.pt412 = -1,
+
+    intraStart.pt123 = -1;
+    intraStart.pt234 = -1;
+    intraStart.pt341 = -1;
+    intraStart.pt412 = -1;
+
+    intraEnd.pt123 = -1;
+    intraEnd.pt234 = -1;
+    intraEnd.pt341 = -1;
+    intraEnd.pt412 = -1;
+
 }
