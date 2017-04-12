@@ -123,10 +123,15 @@ $("#scaleSlider").change(function(value)
     console.log(canvScale);
     canvScale = $(this).val();
     canvas = document.getElementById('dataWindow');   
-    var context = canvas.getContext("2d");
+    var ctx = canvas.getContext("2d");
 
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.scale(canvScale, canvScale);
+    initStats();
+    clearCanvasAndUpdate();
+
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.scale(canvScale, canvScale);
+    
+    // plotTimepoints();
 });
 
 function init()
@@ -149,26 +154,8 @@ function init()
             parseCSV(loadedCSV);       
         }
 
-        reader.readAsDataURL(selectedFile);
-       
-        
+        reader.readAsDataURL(selectedFile); 
     });
-    
-
-}
-
-function setupGraph()
-{
-    canvas = document.getElementById('dataWindow');   
-
-    var ctx = canvas.getContext("2d");
-    ctx.clearRect(0,0, canvas.width, canvas.height);
-    console.log("Clearing........")
-
-    var graphImg = new Image();
-    graphImg.onload = function() { ctx.drawImage(this, 0 ,0);};
-    graphImg.src = fullGraph;
-
 
 }
 
@@ -178,7 +165,6 @@ function parseCSV(inputFile)
 
     //Data Order:
     //  video #, time (sec), converted time, observation
-    
     var lines = inputFile.split("\n");
     
     for(var i = 0; i < lines.length; i++)
@@ -259,7 +245,7 @@ function parseCSV(inputFile)
     dataAvaialble = true;
     fillInTable();
     fullGraph = canvas.toDataURL();
-    setupGraph();
+    //setupGraph();
     
 }
 
@@ -319,10 +305,6 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
             break;
 
         case "234":
-            if(index == timestamps.length - 1)
-            {
-                console.log(triad234);
-            }
             lT_Start = transStart.pt234;
             lT_End = transEnd.pt234;
             lI_Start = intraStart.pt234;
@@ -674,6 +656,7 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
                 end = transEnd.pt123;
                 start = transStart.pt123;
                 delta = Math.abs(end - start);    
+                console.log(timestamps.length);
                 statsTrans.totalTime_123 += delta;
                 dt_123.push(delta);
                 transStart.pt123 = -1;
@@ -795,16 +778,35 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
 
 function initStats()
 {
-    // transEnd = transStart = intraEnd = intraStart = -1;
-    $.each(statsTrans, function(index, value)
+    statsTrans =
     {
-        statsTrans[index] = 0;
-    });
-    
-    $.each(statsIntrans, function(index, value)
+        'totalTime_123': 0,
+        'totalTime_234': 0,
+        'totalTime_341': 0,
+        'totalTime_412': 0
+    };
+
+    statsIntrans =
     {
-        statsIntrans[index] = 0;
-    });
+        'totalTime_123': 0,
+        'totalTime_234': 0,
+        'totalTime_341': 0,
+        'totalTime_412': 0
+    };
+
+    //Delta Trans/Delta Intrans arrays for statistics. Store the delta times of transitivity
+    dt_123.length = 0; 
+    di_123.length = 0;
+    dt_234.length = 0;
+    di_234.length = 0;
+    dt_341.length = 0;
+    di_341.length = 0;
+    dt_412.length = 0;
+    di_412.length = 0;
+
+    timestamps.length = 0;
+    observations.length = 0;
+
 }
 
 function fillInTable()
@@ -829,6 +831,7 @@ function fillInTable()
     $("#tri412-avgTr").text(averageArray(dt_412));
     $("#tri412-avgIn").text(averageArray(di_412));
     
+    initStats();
 }
 
 //Helper
@@ -846,6 +849,7 @@ function isSame(array1, array2)
     return same;
 }
 
+
 function averageArray(array)
 {
     var sum = 0;
@@ -861,11 +865,17 @@ function averageArray(array)
     return sum / array.length;
 }
 
+function zeroArray(array)
+{
+   for(key in array) 
+    {
+        array[key] = 0;
+    }
+}
+
+
 function clearEdgeList(triad)
 {
-    // switch(triad)
-    // {
-    //     case "123":
             edgeList.one_two = edgeList.two_one = edgeList.two_three = edgeList.three_two = edgeList.three_one = edgeList.one_three = 0;
             edgeList.two_three = edgeList.three_two = edgeList.three_four = edgeList.four_three = edgeList.four_two = edgeList.two_four = 0
             edgeList.three_four = edgeList.four_three = edgeList.four_one = edgeList.one_four = edgeList.one_three = edgeList.three_one = 0
@@ -887,20 +897,7 @@ function clearEdgeList(triad)
             triad412 = [
                 0, 0, 0, 0, 0, 0
             ];
-    //         break;
-        
-    //     case "234":
-    //         edgeList.two_three = edgeList.three_two = edgeList.three_four = edgeList.four_three = edgeList.four_two = edgeList.two_four = 0
-    //         break;
 
-    //     case "341":
-    //         edgeList.three_four = edgeList.four_three = edgeList.four_one = edgeList.one_four = edgeList.one_three = edgeList.three_one = 0
-    //         break;
-
-    //     case "412":
-    //          edgeList.four_one = edgeList.one_four = edgeList.one_two = edgeList.two_one = edgeList.two_four = edgeList.four_two = 0;
-    //         break;
-    // }
 }
 
 function initPeriods()
