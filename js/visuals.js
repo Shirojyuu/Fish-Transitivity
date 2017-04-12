@@ -291,11 +291,6 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
     var lI_Start = 0;
     var lI_End = 0;
 
-    if(triad == "341")
-    {
-        // console.log(transStart, transEnd, intraStart, intraEnd);
-        // console.log(triad, plotTriad, timestamps[index]);
-    }
     switch(triad)
     {
         case "123":
@@ -306,6 +301,10 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
             break;
 
         case "234":
+            if(index == timestamps.length - 1)
+            {
+                console.log(triad234);
+            }
             lT_Start = transStart.pt234;
             lT_End = transEnd.pt234;
             lI_Start = intraStart.pt234;
@@ -330,8 +329,7 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
 
         //Do some testing here
         if(isTransitive(plotTriad))
-        {
-           
+        {         
             if(lT_Start == -1)
             {
                 switch(triad)
@@ -355,7 +353,6 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
                      
             }
               
-
             //Confirm intransitive period has ended
             if(lI_Start != -1)
             {
@@ -377,10 +374,9 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
                         intraEnd.pt412 = timestamps[index];            
                         break;
                 }
-                //  lI_End = timestamps[index];
                  plotTransTimePeriod(xOffset * canvScale, yOffset * canvScale, yEnd * canvScale, "intrans", triad);
             }
-
+        }
             if(index == timestamps.length - 1 && lI_Start != -1)
             {
                  switch(triad)
@@ -401,10 +397,9 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
                         intraEnd.pt412 = timestamps[index];            
                         break;
                 }
-                //  lI_End = timestamps[index];
                  plotTransTimePeriod(xOffset * canvScale, yOffset * canvScale, yEnd * canvScale, "intrans", triad);
             }
-        }
+        
 
         if(isIntransitive(plotTriad))
         {
@@ -428,10 +423,34 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
                         intraStart.pt412 = timestamps[index];            
                         break;
                 }
-                // lI_Start = timestamps[index];
             }
-            //Confirm transitive period has ended
+
+            //Confirm intransitive period has ended
             if(lT_Start != -1)
+            {
+                switch(triad)
+                {
+                    case "123":
+                        transEnd.pt123 = timestamps[index];            
+                        break;
+
+                    case "234":                    
+                        transEnd.pt234 = timestamps[index];            
+                        break;
+
+                    case "341":
+                        transEnd.pt341 = timestamps[index];            
+                        break;
+
+                    case "412":
+                        transEnd.pt412 = timestamps[index];            
+                        break;
+                }
+                
+                 plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
+            }
+        }
+            if(index == timestamps.length - 1 && lT_Start != -1)
             {
                 switch(triad)
                 {
@@ -452,39 +471,11 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
                         break;
                 }
                 
-                 plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
+                plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
             }
+        
 
-            
-        }
-
-        if(index == timestamps.length - 1 && lT_Start != -1)
-        {
-                switch(triad)
-                {
-                    case "123":
-                        console.log(transStart, transEnd, intraStart, intraEnd);
-                        transEnd.pt123 = timestamps[index];            
-                        break;
-
-                    case "234":
-                        console.log(transStart, transEnd, intraStart, intraEnd);                    
-                        transEnd.pt234 = timestamps[index];            
-                        break;
-
-                    case "341":
-                        console.log(transStart, transEnd, intraStart, intraEnd);                    
-                        transEnd.pt341 = timestamps[index];            
-                        break;
-
-                    case "412":
-                        console.log(transStart, transEnd, intraStart, intraEnd);                    
-                        transEnd.pt412 = timestamps[index];            
-                        break;
-                }
-                
-                 plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
-        }
+        
 }
 
 //Takes an observation, ob, and builds a mapping between the acting fish and receiving fish
