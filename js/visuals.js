@@ -17,6 +17,7 @@
 var canvas;
 var canvScale = 1;
 var loadedCSV;
+var fullGraph;
 
 var timestamps = [];
 var observations = [];
@@ -119,8 +120,15 @@ $(document).ready
 
 $("#scaleSlider").change(function(value)
 {
+    console.log(canvScale);
     canvScale = $(this).val();
-})
+    canvas = document.getElementById('dataWindow');   
+    var context = canvas.getContext("2d");
+
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.scale(canvScale, canvScale);
+});
+
 function init()
 {
     canvas = document.getElementById('dataWindow');   
@@ -137,13 +145,31 @@ function init()
             var b64 = data.split('base64,')[1];
             var csv = atob(b64);
             loadedCSV = savedCSV = csv;
-            parseCSV(loadedCSV);          
-            plotTimepoints();
+            plotTimepoints();            
+            parseCSV(loadedCSV);       
         }
+
         reader.readAsDataURL(selectedFile);
        
         
     });
+    
+
+}
+
+function setupGraph()
+{
+    canvas = document.getElementById('dataWindow');   
+
+    var ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0, canvas.width, canvas.height);
+    console.log("Clearing........")
+
+    var graphImg = new Image();
+    graphImg.onload = function() { ctx.drawImage(this, 0 ,0);};
+    graphImg.src = fullGraph;
+
+
 }
 
 //Split the csv on a per-line basis.
@@ -154,7 +180,6 @@ function parseCSV(inputFile)
     //  video #, time (sec), converted time, observation
     
     var lines = inputFile.split("\n");
-//    console.log(lines);
     
     for(var i = 0; i < lines.length; i++)
     {
@@ -167,18 +192,8 @@ function parseCSV(inputFile)
             {
                 timestamps.push(tStamp);
                 observations.push(obs);
-
-                //Old, using the selectors at the top.
-                
-
-                // plotOnCanvas(triad123, 8, 16, "123");
-                // plotOnCanvas(triad234, 33, 41, "234");
-                // plotOnCanvas(triad341, 61, 69, "341");
-                
             }
         }
-
-       
             
     }
     
@@ -243,6 +258,9 @@ function parseCSV(inputFile)
     totalTime = timestamps[timestamps.length - 1];
     dataAvaialble = true;
     fillInTable();
+    fullGraph = canvas.toDataURL();
+    setupGraph();
+    
 }
 
 //Plots little ticks to represent units of time.
