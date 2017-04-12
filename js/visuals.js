@@ -22,7 +22,7 @@ var fullGraph;
 var timestamps = [];
 var observations = [];
 var dataAvaialble = false;
-
+var autoScroll = true;
 //The last loadedCSV file; global access
 var savedCSV;
 
@@ -157,8 +157,21 @@ function init()
         reader.readAsDataURL(selectedFile); 
     });
 
+    $("#export").click(function()
+    {
+        window.open(fullGraph, "_blank");
+    })
 }
 
+function update()
+{
+    if(autoScroll)
+    {
+        
+        $("#panel-body").animate({scrollRight: '+=3'}, 1000, 'easeOutQuad');
+    }
+    requestAnimationFrame(update);
+}
 //Split the csv on a per-line basis.
 function parseCSV(inputFile)
 {
@@ -245,6 +258,8 @@ function parseCSV(inputFile)
     dataAvaialble = true;
     fillInTable();
     fullGraph = canvas.toDataURL();
+    $("#export").attr('disabled', false);
+    requestAnimationFrame(update);
     //setupGraph();
     
 }
@@ -656,7 +671,6 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
                 end = transEnd.pt123;
                 start = transStart.pt123;
                 delta = Math.abs(end - start);    
-                console.log(timestamps.length);
                 statsTrans.totalTime_123 += delta;
                 dt_123.push(delta);
                 transStart.pt123 = -1;
