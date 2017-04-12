@@ -18,6 +18,7 @@ var canvas;
 var canvScale = 1;
 var loadedCSV;
 var fullGraph;
+var maxWidth, maxHeight;
 
 var timestamps = [];
 var observations = [];
@@ -123,15 +124,15 @@ $("#scaleSlider").change(function(value)
     console.log(canvScale);
     canvScale = $(this).val();
     canvas = document.getElementById('dataWindow');   
+    canvas.width = maxWidth * canvScale;
     var ctx = canvas.getContext("2d");
-
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    plotTimepoints();
     initStats();
     clearCanvasAndUpdate();
 
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.scale(canvScale, canvScale);
     
-    // plotTimepoints();
 });
 
 function init()
@@ -139,6 +140,8 @@ function init()
     canvas = document.getElementById('dataWindow');   
     var context = canvas.getContext("2d");
     
+    maxWidth = canvas.width;
+    maxHeight = canvas.height;
     //Open up the CSV file of choice
     $('#inputfile').change(function(data)
     {
@@ -167,8 +170,8 @@ function update()
 {
     if(autoScroll)
     {
-        
-        $("#panel-body").animate({scrollRight: '+=3'}, 1000, 'easeOutQuad');
+        canvas = document.getElementById('dataWindow');          
+
     }
     requestAnimationFrame(update);
 }
@@ -272,7 +275,8 @@ function plotTimepoints()
     //Labels for the triads
     ctx.fillStyle = "#000000";
     ctx.fill();
-            
+    ctx.font = "10px Arial";
+    
     ctx.fillText("1-2-3", 10 * canvScale, 12 * canvScale);
     ctx.fillText("2-3-4", 10 * canvScale, 37 * canvScale);
     ctx.fillText("3-4-1", 10 * canvScale, 65 * canvScale);
@@ -280,14 +284,14 @@ function plotTimepoints()
 
 
     ctx.beginPath();
-    ctx.rect(50 * canvScale, 110 * canvScale, (canvas.width + 50) * canvScale, canvScale);
+    ctx.rect(50 * canvScale, 110 * canvScale, (maxWidth) * canvScale, canvScale);
     ctx.fillStyle = "#000000";
     ctx.fill();
 
 
     //Plot the numbers, too!
-    ctx.font = "10px Arial";
-    for(var i = 50; i < canvas.width ; i++)
+    ctx.font = 10 * canvScale + "px Arial";
+    for(var i = 50; i < maxWidth ; i++)
     {
         if(i % 50 == 0)
         {
