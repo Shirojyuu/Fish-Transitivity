@@ -5,16 +5,20 @@
 //TODOS
 // TODO : Zoom level slider for the graph.
 //          - Fix display according to zoom
+// TODO : Figure out how to handle data > 32,767 seconds...
 
 // TODO : Support other animals/actions
         // - Test with Chickens
 
 var canvas;
 var canvScale = 1;
+var wScale = 1;
+var lastEntry = -1;
 var loadedCSV;
 var fullGraph;
 var maxWidth, maxHeight;
 
+var animalActs = [];
 var timestamps = [];
 var observations = [];
 var dataAvaialble = false;
@@ -126,7 +130,7 @@ $("#scaleSlider").change(function(value)
     plotTimepoints();
     initStats();
     clearCanvasAndUpdate();
-
+    
     
 });
 
@@ -148,11 +152,11 @@ function init()
             var b64 = data.split('base64,')[1];
             var csv = atob(b64);
             loadedCSV = savedCSV = csv;
-            plotTimepoints();            
+            clearCanvasAndUpdate();            
             parseCSV(loadedCSV);
-            clearCanvasAndUpdate();
+            //plotTimepoints();            
             
-            // canvas.width = timestamps[timestamps.length - 1];
+            
         }
 
         reader.readAsDataURL(selectedFile); 
@@ -176,7 +180,7 @@ function update()
 //Split the csv on a per-line basis.
 function parseCSV(inputFile)
 {
-
+    
     //Data Order:
     //  video #, time (sec), converted time, observation
     var lines = inputFile.split("\n");
@@ -197,6 +201,19 @@ function parseCSV(inputFile)
             
     }
     
+    lastEntry = timestamps[timestamps.length - 1];
+    plotTimepoints();
+    displayBars();
+    
+}
+
+function resizeCanvas(rsWidth)
+{
+    var ratio = canvas.width / canvas.height;
+    canvas.width = rsWidth;
+}
+function displayBars()
+    {
      //Disgusting series of for-loops to display each bar because JS is single-threaded...
      for(var j = 0; j <= timestamps.length; j++)
      {
@@ -268,6 +285,10 @@ function parseCSV(inputFile)
 //Plots little ticks to represent units of time.
 function plotTimepoints()
 {
+    wScale = lastEntry / 32767;
+    if(wScale > 1)
+        wScale = 0.65
+    console.log(wScale);
     var ctx = canvas.getContext("2d");
     
     //Labels for the triads
@@ -282,21 +303,21 @@ function plotTimepoints()
 
 
     ctx.beginPath();
-    ctx.rect(50 * canvScale, 110 * canvScale, (maxWidth) * canvScale, canvScale);
+    ctx.rect(50 * canvScale * wScale, 110 * canvScale, lastEntry * canvScale * wScale, canvScale);
     ctx.fillStyle = "#000000";
     ctx.fill();
 
 
     //Plot the numbers, too!
     ctx.font = 10 * canvScale + "px Arial";
-    for(var i = 50; i < maxWidth ; i++)
+    for(var i = 0; i < lastEntry; i++)
     {
-        if(i % 50 == 0)
+        if(i % 50 * wScale == 0)
         {
-            ctx.rect(i, 115 * canvScale, 0.4 * canvScale, 5 * canvScale);
+            ctx.rect(i * wScale, 115 * canvScale, 0.4 * canvScale * wScale, 5 * canvScale);
             ctx.fillStyle = "#000000";
             ctx.fill();
-            ctx.fillText(i, (i + 1) * canvScale, 130 * canvScale);
+            ctx.fillText(i, (i + 1) * canvScale * wScale, 130 * canvScale);
         }
 
     }
@@ -488,7 +509,7 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
                         break;
                 }
                 
-                plotTransTimePeriod(xOffset * canvScale, yOffset *canvScale, yEnd * canvScale, "trans", triad);
+                plotTransTimePeriod(xOffset * canvScale , yOffset *canvScale, yEnd * canvScale, "trans", triad);
             }
         
 
@@ -649,7 +670,6 @@ function clearCanvasAndUpdate()
 {
     var ctx = canvas.getContext("2d");
     ctx.clearRect(0,0, canvas.width, canvas.height);
-    plotTimepoints();
     
     if(savedCSV != undefined)
         parseCSV(savedCSV);
@@ -714,7 +734,7 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
         
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect((xOff + start) * canvScale, yOff * canvScale, (end - (xOff + start))*canvScale, (yEnd - yOff)*canvScale);
+        ctx.fillRect((xOff + start) * canvScale * wScale, yOff * canvScale, (end - (xOff + start)) * canvScale * wScale, (yEnd - yOff)*canvScale);
         ctx.closePath();
 
         
@@ -724,7 +744,7 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
             ctx.font = "bold 13px Verdana";   
             ctx.fillStyle = style;
             ctx.fill();
-            ctx.fillText(delta + " sec", start* canvScale,  yOff* canvScale);
+            ctx.fillText(delta + " sec", start* canvScale * wScale,  yOff* canvScale);
             ctx.closePath();
         }
         return;
@@ -780,7 +800,7 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
 
         ctx.beginPath();
         ctx.strokeStyle = ctx.fillStyle = style;
-        ctx.fillRect((xOff + start)* canvScale, yOff* canvScale, (end - (xOff + start))* canvScale, (yEnd - yOff)* canvScale);         
+        ctx.fillRect((xOff + start)* canvScale * wScale, yOff* canvScale, (end - (xOff + start))* canvScale * wScale, (yEnd - yOff)* canvScale);         
         ctx.closePath();
 
 
@@ -789,7 +809,7 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
             ctx.font = "bold 13px Verdana";   
             ctx.fillStyle = style;
             ctx.fill();
-            ctx.fillText(delta + " sec", start* canvScale, yOff* canvScale);
+            ctx.fillText(delta + " sec", start* canvScale * wScale, yOff* canvScale);
             ctx.closePath();
         }
         return;
@@ -831,30 +851,30 @@ function initStats()
 
 function fillInTable()
 {
-    $("#tri123-tr").text(statsTrans.totalTime_123);
-    $("#tri123-in").text(statsIntrans.totalTime_123);
-    $("#tri123-avgTr").text(averageArray(dt_123));
-    $("#tri123-avgIn").text(averageArray(di_123));
+    $("#tri123-tr").text(parseFloat(statsTrans.totalTime_123).toFixed(2));
+    $("#tri123-in").text(parseFloat(statsIntrans.totalTime_123).toFixed(2));
+    $("#tri123-avgTr").text(parseFloat(averageArray(dt_123)).toFixed(2));
+    $("#tri123-avgIn").text(parseFloat(averageArray(di_123)).toFixed(2));
 
-    $("#tri234-tr").text(statsTrans.totalTime_234);
-    $("#tri234-in").text(statsIntrans.totalTime_234);
-    $("#tri234-avgTr").text(averageArray(dt_234));
-    $("#tri234-avgIn").text(averageArray(di_234));
+    $("#tri234-tr").text(parseFloat(statsTrans.totalTime_234).toFixed(2));
+    $("#tri234-in").text(parseFloat(statsIntrans.totalTime_234).toFixed(2));
+    $("#tri234-avgTr").text(parseFloat(averageArray(dt_234)).toFixed(2));
+    $("#tri234-avgIn").text(parseFloat(averageArray(di_234)).toFixed(2));
 
-    $("#tri341-tr").text(statsTrans.totalTime_341);
-    $("#tri341-in").text(statsIntrans.totalTime_341);
-    $("#tri341-avgTr").text(averageArray(dt_341));
-    $("#tri341-avgIn").text(averageArray(di_341));
+    $("#tri341-tr").text(parseFloat(statsTrans.totalTime_341).toFixed(2));
+    $("#tri341-in").text(parseFloat(statsIntrans.totalTime_341).toFixed(2));
+    $("#tri341-avgTr").text(parseFloat(averageArray(dt_341)).toFixed(2));
+    $("#tri341-avgIn").text(parseFloat(averageArray(di_341)).toFixed(2));
 
-    $("#tri412-tr").text(statsTrans.totalTime_412);
-    $("#tri412-in").text(statsIntrans.totalTime_412);
-    $("#tri412-avgTr").text(averageArray(dt_412));
-    $("#tri412-avgIn").text(averageArray(di_412));
+    $("#tri412-tr").text(parseFloat(statsTrans.totalTime_412).toFixed(2));
+    $("#tri412-in").text(parseFloat(statsIntrans.totalTime_412).toFixed(2));
+    $("#tri412-avgTr").text(parseFloat(averageArray(dt_412)).toFixed(2));
+    $("#tri412-avgIn").text(parseFloat(averageArray(di_412)).toFixed(2));
     
     initStats();
 }
 
-//Helper
+//Helper Functions
 function isSame(array1, array2)
 {
     var same;
