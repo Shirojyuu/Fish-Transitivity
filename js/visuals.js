@@ -5,15 +5,10 @@
 //TODOS
 // TODO : Zoom level slider for the graph.
 //          - Fix display according to zoom
-// TODO : Statistics
-//          - Total Time Triad is in transitive/intransitivite states (and stats on that)    
-//                  - Which stats? - Avg Time trans/intrans per triad; Total in all groups (avg) 
-//                  - Use Excel to total stuff
 
-// TODO : Calculations for the timing of certain bars
+// TODO : Support other animals/actions
+        // - Test with Chickens
 
-// Considerations:
-// Bars vs Observation Plots
 var canvas;
 var canvScale = 1;
 var loadedCSV;
@@ -154,7 +149,10 @@ function init()
             var csv = atob(b64);
             loadedCSV = savedCSV = csv;
             plotTimepoints();            
-            parseCSV(loadedCSV);       
+            parseCSV(loadedCSV);
+            clearCanvasAndUpdate();
+            
+            // canvas.width = timestamps[timestamps.length - 1];
         }
 
         reader.readAsDataURL(selectedFile); 
@@ -720,13 +718,15 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
         ctx.closePath();
 
         
-
-        ctx.beginPath();
-        ctx.font = "bold 13px Verdana";   
-        ctx.fillStyle = style;
-        ctx.fill();
-        ctx.fillText(delta + " sec", start* canvScale,  yOff* canvScale);
-        ctx.closePath();
+        if(delta > 15)
+        {
+            ctx.beginPath();
+            ctx.font = "bold 13px Verdana";   
+            ctx.fillStyle = style;
+            ctx.fill();
+            ctx.fillText(delta + " sec", start* canvScale,  yOff* canvScale);
+            ctx.closePath();
+        }
         return;
        
     }
@@ -784,12 +784,14 @@ function plotTransTimePeriod(xOff, yOff, yEnd, mode, triad)
         ctx.closePath();
 
 
-        ctx.font = "bold 13px Verdana";   
-        ctx.fillStyle = style;
-        ctx.fill();
-        ctx.fillText(delta + " sec", start* canvScale, yOff* canvScale);
-        ctx.closePath();
-
+        if(delta > 15)
+        {
+            ctx.font = "bold 13px Verdana";   
+            ctx.fillStyle = style;
+            ctx.fill();
+            ctx.fillText(delta + " sec", start* canvScale, yOff* canvScale);
+            ctx.closePath();
+        }
         return;
     }
 }
