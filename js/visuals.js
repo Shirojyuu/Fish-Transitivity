@@ -141,6 +141,24 @@ function init()
     
     maxWidth = canvas.width;
     maxHeight = canvas.height;
+
+    //Update Action Filter
+    $('#presets').change(function(data)
+    {
+        console.log($(this)[0].value);
+        if($(this)[0].value == "Fish")
+        {
+            $('#actionFilter').attr('value', "T, B, C");
+        }
+    });
+
+    $('#applyAF').click(function()
+    {
+        var actionString = $('#actionFilter').val();
+
+        animalActs = actionString.split(",");
+        console.log(animalActs);
+    });
     //Open up the CSV file of choice
     $('#inputfile').change(function(data)
     {
@@ -192,11 +210,14 @@ function parseCSV(inputFile)
         var obs = components[3];
         if(typeof(obs) != 'undefined')
         {
-            if(obs.indexOf("L") == -1 && obs.indexOf("panic") == -1 && obs.length < 6)
+            animalActs.forEach(function(symb) 
             {
-                timestamps.push(tStamp);
-                observations.push(obs);
-            }
+                if(obs.indexOf(symb) != -1)
+                {
+                    timestamps.push(tStamp);
+                    observations.push(obs);
+                }
+            }, this);
         }
             
     }
