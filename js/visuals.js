@@ -5,10 +5,9 @@
 //TODOS
 // TODO : Zoom level slider for the graph.
 //          - Fix display according to zoom
-// TODO : Figure out how to handle data > 32,767 seconds...
 
-// TODO : Support other animals/actions
-        // - Test with Chickens
+// TODO : Find out why act/rcv equality tests don't fire mapping function
+        // - Get reformatted Chicken data
 
 var canvas;
 var canvScale = 1;
@@ -146,9 +145,15 @@ function init()
     $('#presets').change(function(data)
     {
         console.log($(this)[0].value);
-        if($(this)[0].value == "Fish")
+        switch($(this)[0].value)
         {
-            $('#actionFilter').attr('value', "T, B, C");
+            case "Fish":
+                $('#actionFilter').attr('value', "T,B,C");
+                break;
+
+            case "Chicken":
+                $('#actionFilter').attr('value', "P,J");
+                break;
         }
     });
 
@@ -171,8 +176,7 @@ function init()
             var csv = atob(b64);
             loadedCSV = savedCSV = csv;
             clearCanvasAndUpdate();            
-            parseCSV(loadedCSV);
-            //plotTimepoints();            
+            parseCSV(loadedCSV);           
             
             
         }
@@ -354,6 +358,10 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
     var lI_Start = 0;
     var lI_End = 0;
 
+    if(timestamps[index] == 1158)
+    {
+        console.log("STOP");
+    }
     switch(triad)
     {
         case "123":
@@ -542,8 +550,8 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
 function mapRelation(ob, triad)
 {
     var interactions = ob.split(" ");
-    var act = interactions[0];
-    var rcv = interactions[2];
+    var act = interactions[0].trim();
+    var rcv = interactions[2].trim();
 
     switch(act)
     {
