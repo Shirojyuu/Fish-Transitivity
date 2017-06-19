@@ -163,6 +163,7 @@ function init()
 
         animalActs = actionString.split(",");
         console.log(animalActs);
+        $('#actionFilter').attr('value', "");
     });
     //Open up the CSV file of choice
     $('#inputfile').change(function(data)
@@ -258,6 +259,8 @@ function displayBars()
      {
             if(k < timestamps.length)
             {   
+                if(timestamps[k] == "724")
+                    console.log("STAHP");
                 mapRelation(observations[k], "234");
                 plotOnCanvas(triad234, 33, 41, "234", k);
             }
@@ -358,7 +361,7 @@ function plotOnCanvas(plotTriad, yOffset, yEnd, triad, index)
     var lI_Start = 0;
     var lI_End = 0;
 
-    if(timestamps[index] == 1158)
+    if(timestamps[index] == 4866 && triad == "234")
     {
         console.log("STOP");
     }
@@ -674,8 +677,10 @@ function isTransitive(testTriad)
     var config2 = [1, 0, 0, 1, 1, 0];
     var config3 = [0, 1, 0, 1, 1, 0];
     var config4 = [1, 0, 0, 1, 0, 1];    
+    var config5 = [0, 1, 1, 0, 1, 0];
+    var config6 = [0, 1, 1, 0, 0, 1];        
 
-    if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3) || isSame(testTriad, config4))
+    if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3) || isSame(testTriad, config4) || isSame(testTriad, config5) || isSame(testTriad, config6))
         return true;
     
     return false;
@@ -687,7 +692,7 @@ function isIntransitive(testTriad)
     //Two configurations for being intransitive:
     var config1 = [1, 0, 1, 0, 1, 0];
     var config2 = [0, 1, 0, 1, 0, 1];
-    var config3 = [0, 1, 1, 0, 0, 1];    
+    var config3 = [0, 1, 0, 1, 0, 1];    
 
     if(isSame(testTriad, config1) || isSame(testTriad, config2) || isSame(testTriad, config3))
         return true;
